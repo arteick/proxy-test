@@ -1,5 +1,5 @@
 import * as store from './store.js';
-import { lookup } from './lookup.js';
+import { lookup, cacheGet, cachePut } from './lookup.js';
 import { canScan, startScan } from './scan.js';
 
 const $ = (id) => document.getElementById(id);
@@ -61,10 +61,12 @@ async function onCode(raw) {
   if (!code || busy) return;
   busy = true;
   try {
-    let p = items.find((x) => x.code === code) || (await lookup(code));
+    let p = items.find((x) => x.code === code) || cacheGet(localStorage, code) || (await lookup(code));
+    if (p && !cacheGet(localStorage, code)) cachePut(localStorage, p);
     if (!p) {
       const name = prompt(`Товар ${code} не найден в базе. Как назвать?`);
       p = { code, name: (name || '').trim() || `Товар ${code}`, cat: '' };
+      cachePut(localStorage, p);
     }
     if (mode === 'add') {
       if (items.some((x) => x.code === code)) return toast(`Товар уже добавлен в список: ${p.name}`);

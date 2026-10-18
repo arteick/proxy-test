@@ -35,10 +35,39 @@ async function fromHost(host, code, f) {
   }
 }
 
+// UPCitemdb, пробный доступ без ключа (лимит ~100 запросов в сутки с адреса); сильнее по западным товарам.
+async function fromUpcItemDb(code, f) {
+  try {
+    const r = await f(`https://api.upcitemdb.com/prod/trial/lookup?upc=${encodeURIComponent(code)}`);
+    if (!r.ok) return null;
+    const j = await r.json();
+    const it = j && j.items && j.items[0];
+    const title = it && String(it.title || '').trim();
+    if (!title) return null;
+    const brand = String(it.brand || '').trim();
+    return { code, name: brand && !title.toLowerCase().includes(brand.toLowerCase()) ? `${brand} ${title}` : title, cat: it.category || '' };
+  } catch {
+    return null;
+  }
+}
+
+// Локальный кэш: найденное и введённое вручную, чтобы не ходить в сеть дважды.
+const KEY = 'shop.names';
+export function cacheGet(storage, code) {
+  try { return JSON.parse(storage.getItem(KEY) || '{}')[code] || null; } catch { return null; }
+}
+export function cachePut(storage, p) {
+  try {
+    const all = JSON.parse(storage.getItem(KEY) || '{}');
+    all[p.code] = p;
+    storage.setItem(KEY, JSON.stringify(all));
+  } catch { /* кэш необязателен */ }
+}
+
 export async function lookup(code, f = fetch) {
   for (const host of SOURCES) {
     const res = await fromHost(host, code, f);
     if (res) return res;
   }
-  return null;
+  return fromUpcItemDb(code, f);
 }

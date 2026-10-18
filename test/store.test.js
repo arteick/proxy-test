@@ -111,3 +111,18 @@ test('fullName: русское название и граммовка из produ
   const { fullName } = await import('../app/lookup.js');
   assert.equal(fullName({ brands: 'Arla', product_name: 'Aktiv Bio Jordbær', product_name_ru: 'Йогурт клубника', product_quantity: '500', product_quantity_unit: 'g' }), 'Arla Йогурт клубника 500 g');
 });
+
+test('lookup: после Open*Facts пробует UPCitemdb', async () => {
+  const f = async (u) => ({ ok: true, json: async () => (u.includes('upcitemdb') ? { items: [{ title: 'Cola 0.33', brand: 'Brand' }] } : { status: 0 }) });
+  assert.equal((await lookup('444', f)).name, 'Brand Cola 0.33');
+});
+
+test('кэш названий: запись и чтение, сбой хранилища не падает', async () => {
+  const { cacheGet, cachePut } = await import('../app/lookup.js');
+  const mem = new Map();
+  const st = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) };
+  cachePut(st, { code: '5', name: 'Чай', cat: '' });
+  assert.equal(cacheGet(st, '5').name, 'Чай');
+  assert.equal(cacheGet(st, '6'), null);
+  assert.equal(cacheGet({ getItem() { throw new Error('x'); } }, '5'), null);
+});
