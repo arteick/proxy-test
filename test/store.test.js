@@ -85,3 +85,14 @@ test('fullName: производитель, товар, граммовка бе�
   assert.equal(fullName({ brands: 'Простоквашино', product_name: 'Простоквашино Молоко 930 г', quantity: '930 г' }), 'Простоквашино Молоко 930 г');
   assert.equal(fullName({ product_name: 'Хлеб' }), 'Хлеб');
 });
+
+test('qty: по умолчанию 1, меняется в пределах 1..99, переносится ссылкой', () => {
+  let l = s.add([], milk);
+  assert.equal(l[0].qty, 1);
+  l = s.setQty(l, '111', 3);
+  assert.equal(l[0].qty, 3);
+  assert.equal(s.setQty(l, '111', 0)[0].qty, 1);
+  assert.equal(s.setQty(l, '111', 500)[0].qty, 99);
+  assert.equal(s.decode(s.encode(l))[0].qty, 3);
+  assert.equal(s.add(l, milk)[0].qty, 3);
+});

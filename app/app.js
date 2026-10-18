@@ -36,7 +36,19 @@ function render() {
     del.textContent = '✕';
     del.setAttribute('aria-label', 'Удалить');
     del.onclick = () => commit(store.remove(items, p.code));
-    li.append(cb, span, del);
+    const q = document.createElement('span');
+    q.className = 'qty';
+    const step = (d) => {
+      const b = document.createElement('button');
+      b.textContent = d > 0 ? '+' : '−';
+      b.setAttribute('aria-label', d > 0 ? 'Больше' : 'Меньше');
+      b.onclick = () => commit(store.setQty(items, p.code, (p.qty || 1) + d));
+      return b;
+    };
+    const num = document.createElement('b');
+    num.textContent = p.qty || 1;
+    q.append(step(-1), num, step(1));
+    li.append(cb, span, q, del);
     return li;
   }));
   $('empty').hidden = items.length > 0;
@@ -55,7 +67,7 @@ async function onCode(raw) {
       p = { code, name: (name || '').trim() || `Товар ${code}`, cat: '' };
     }
     if (mode === 'add') {
-      if (items.some((x) => x.code === code)) return toast(`Уже в списке: ${p.name}`);
+      if (items.some((x) => x.code === code)) return toast(`Товар уже добавлен в список: ${p.name}`);
       commit(store.add(items, p));
       return toast(`Добавлено: ${p.name}`);
     }

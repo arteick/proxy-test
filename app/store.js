@@ -17,11 +17,17 @@ export function save(storage, items) {
 export function add(items, p) {
   const code = String(p?.code ?? '').trim();
   if (!code || items.some((x) => x.code === code)) return items;
-  return [{ code, name: String(p.name || `Товар ${code}`), cat: p.cat || '', bought: false }, ...items];
+  return [{ code, name: String(p.name || `Товар ${code}`), cat: p.cat || '', bought: false, qty: 1 }, ...items];
 }
 
 export function remove(items, code) {
   return items.filter((x) => x.code !== code);
+}
+
+// Количество: целое от 1 до 99.
+export function setQty(items, code, qty) {
+  const n = Math.min(99, Math.max(1, Math.trunc(Number(qty)) || 1));
+  return items.map((x) => (x.code === code ? { ...x, qty: n } : x));
 }
 
 export function toggle(items, code) {
@@ -30,7 +36,7 @@ export function toggle(items, code) {
 
 // Список в строку для ссылки (без отметок «куплено»).
 export function encode(items) {
-  const rows = items.map((x) => [x.code, x.name, x.cat]);
+  const rows = items.map((x) => [x.code, x.name, x.cat, x.qty || 1]);
   const bin = String.fromCharCode(...new TextEncoder().encode(JSON.stringify(rows)));
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
@@ -40,7 +46,7 @@ export function decode(str) {
     const bin = atob(String(str).replace(/-/g, '+').replace(/_/g, '/'));
     const rows = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))));
     if (!Array.isArray(rows)) return [];
-    return rows.filter((r) => Array.isArray(r) && r[0]).map((r) => ({ code: String(r[0]), name: String(r[1] ?? ''), cat: String(r[2] ?? ''), bought: false }));
+    return rows.filter((r) => Array.isArray(r) && r[0]).map((r) => ({ code: String(r[0]), name: String(r[1] ?? ''), cat: String(r[2] ?? ''), bought: false, qty: Math.min(99, Math.max(1, Math.trunc(Number(r[3])) || 1)) }));
   } catch {
     return [];
   }
@@ -61,5 +67,5 @@ export function match(items, p) {
 }
 
 export function replace(items, code, p) {
-  return items.map((x) => (x.code === code ? { code: p.code, name: p.name, cat: p.cat || '', bought: true } : x));
+  return items.map((x) => (x.code === code ? { code: p.code, name: p.name, cat: p.cat || '', bought: true, qty: x.qty || 1 } : x));
 }
