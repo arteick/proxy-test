@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1a73e8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+<title>Задачи</title>
+</head>
+<body>
+<main>
+  <h1>Задачи</h1>
+  <form id="form">
+    <input id="text" placeholder="Что нужно сделать?" autocomplete="off" required>
+    <button>Добавить</button>
+  </form>
+  <nav id="tabs">
+    <button data-mode="all" class="on">Все</button>
+    <button data-mode="active">Активные</button>
+    <button data-mode="done">Готово</button>
+  </nav>
+  <ul id="list"></ul>
+  <p id="empty" hidden>Пока пусто</p>
+  <button id="clear" class="link">Убрать выполненные</button>
+  <button id="install" class="link" hidden>Установить приложение</button>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>
