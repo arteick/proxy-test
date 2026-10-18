@@ -96,3 +96,8 @@ test('qty: по умолчанию 1, меняется в пределах 1..99
   assert.equal(s.decode(s.encode(l))[0].qty, 3);
   assert.equal(s.add(l, milk)[0].qty, 3);
 });
+
+test('fullName: русское название и граммовка из product_quantity', async () => {
+  const { fullName } = await import('../app/lookup.js');
+  assert.equal(fullName({ brands: 'Arla', product_name: 'Aktiv Bio Jordbær', product_name_ru: 'Йогурт клубника', product_quantity: '500', product_quantity_unit: 'g' }), 'Arla Йогурт клубника 500 g');
+});
