@@ -6,3 +6,5 @@
 2026-10-18 13:23. Запущен workflow Pages (run 39131281917) через mcp actions_run_trigger; gh dispatch не нужен. Результат не дождан.
 
 - 2026-10-18 13:25: проверен run 39131281917 (Pages): failure на configure-pages из-за выключенных Pages; тесты зелёные.
+
+- 2026-10-18 13:28: Pages run 39131642467 — success (все шаги, deploy 8 с).
