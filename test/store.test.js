@@ -79,6 +79,16 @@ test('lookup: Open Food Facts, неизвестный код, сбой сети'
   assert.equal(await lookup('111', boom), null);
 });
 
+test('lookup: цепочка баз — берёт первую, где нашёлся товар', async () => {
+  const urls = [];
+  const f = async (u) => {
+    urls.push(u);
+    return { ok: true, json: async () => (u.includes('openbeautyfacts') ? { status: 1, product: { product_name: 'Шампунь' } } : { status: 0 }) };
+  };
+  assert.equal((await lookup('222', f)).name, 'Шампунь');
+  assert.equal(urls.length, 3);
+});
+
 test('fullName: производитель, товар, граммовка без дублей', async () => {
   const { fullName } = await import('../app/lookup.js');
   assert.equal(fullName({ brands: 'Простоквашино, Данон', product_name: 'Молоко 3,2%', quantity: '930 г' }), 'Простоквашино Молоко 3,2% 930 г');

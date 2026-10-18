@@ -16,3 +16,4 @@
 
 - 2026-10-18 13:34: Pages run 39132058059 (main, 35da62e) — success.
 - 2026-10-18 13:38: Pages run 39132368261 (main, 56301b8) — success (npm test, configure-pages, upload, deploy).
+2026-10-18 13:42. lookup.js: цепочка из 4 баз Open*Facts. npm test — зелёные (включая новый тест цепочки).

@@ -1,5 +1,5 @@
 // Офлайн: кэш оболочки приложения, сначала сеть, при отказе — кэш.
-const CACHE = 'shop-v2';
+const CACHE = 'shop-v3';
 const FILES = ['./', 'index.html', 'app.js', 'store.js', 'lookup.js', 'scan.js', 'style.css', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())));
