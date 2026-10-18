@@ -15,3 +15,4 @@
 - 2026-10-18: антидубль с тостом «Товар уже добавлен в список» + количество (setQty, − / +). npm test 12/12.
 
 - 2026-10-18 13:34: Pages run 39132058059 (main, 35da62e) — success.
+- 2026-10-18 13:38: Pages run 39132368261 (main, 56301b8) — success (npm test, configure-pages, upload, deploy).
