@@ -4,3 +4,5 @@
 
 2026-10-18. Приложение «Покупки»: сканер (BarcodeDetector), поиск в Open Food Facts, список с удалением, шаринг ссылкой, режим магазина. Проверено: npm test 10/10; Playwright-дым в Chromium: добавление и отметка по ручному коду без ошибок JS. Не проверено: камера, реальный Open Food Facts, Android.
 2026-10-18 13:23. Запущен workflow Pages (run 39131281917) через mcp actions_run_trigger; gh dispatch не нужен. Результат не дождан.
+
+- 2026-10-18 13:25: проверен run 39131281917 (Pages): failure на configure-pages из-за выключенных Pages; тесты зелёные.
