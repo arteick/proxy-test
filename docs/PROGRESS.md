@@ -18,3 +18,4 @@
 - 2026-10-18 13:38: Pages run 39132368261 (main, 56301b8) — success (npm test, configure-pages, upload, deploy).
 2026-10-18 13:42. lookup.js: цепочка из 4 баз Open*Facts. npm test — зелёные (включая новый тест цепочки).
 - 2026-10-18: lookup.js — UPCitemdb как пятая база, cacheGet/cachePut; app.js использует кэш; тесты 16/16.
+- 2026-10-18 13:50: Pages run 39133317972 (main, 6e4f6b1) — success.
