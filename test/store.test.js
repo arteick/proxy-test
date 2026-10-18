@@ -78,3 +78,10 @@ test('lookup: Open Food Facts, неизвестный код, сбой сети'
   const boom = async () => { throw new Error('offline'); };
   assert.equal(await lookup('111', boom), null);
 });
+
+test('fullName: производитель, товар, граммовка без дублей', async () => {
+  const { fullName } = await import('../app/lookup.js');
+  assert.equal(fullName({ brands: 'Простоквашино, Данон', product_name: 'Молоко 3,2%', quantity: '930 г' }), 'Простоквашино Молоко 3,2% 930 г');
+  assert.equal(fullName({ brands: 'Простоквашино', product_name: 'Простоквашино Молоко 930 г', quantity: '930 г' }), 'Простоквашино Молоко 930 г');
+  assert.equal(fullName({ product_name: 'Хлеб' }), 'Хлеб');
+});
