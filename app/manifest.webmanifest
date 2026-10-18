@@ -1,6 +1,6 @@
 {
-  "name": "Задачи",
-  "short_name": "Задачи",
+  "name": "Покупки",
+  "short_name": "Покупки",
   "lang": "ru",
   "start_url": "./",
   "scope": "./",

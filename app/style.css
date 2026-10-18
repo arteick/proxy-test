@@ -15,3 +15,12 @@ li span { flex:1; word-break:break-word; }
 li.done span { text-decoration:line-through; opacity:.5; }
 li .del { background:none; color:#d93025; padding:4px 8px; }
 .link { background:none; color:var(--acc); }
+.row { display:flex; gap:8px; margin:12px 0; flex-wrap:wrap; }
+.row button:not(.link) { flex:1; }
+.alt { background:var(--card); color:var(--fg); border:1px solid #8886; }
+#scanner { position:fixed; inset:0; background:var(--bg); padding:16px; display:flex; flex-direction:column; gap:12px; z-index:2; }
+#video { width:100%; max-height:55vh; background:#000; border-radius:8px; object-fit:cover; }
+#manual { display:flex; gap:8px; }
+#manual input { flex:1; padding:12px; border:1px solid #8886; border-radius:8px; background:var(--card); color:var(--fg); font:inherit; }
+#toast { position:fixed; left:16px; right:16px; bottom:24px; padding:14px; background:#222; color:#fff; border-radius:8px; z-index:3; text-align:center; }
+[hidden] { display:none !important; }

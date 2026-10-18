@@ -7,25 +7,30 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="style.css">
-<title>Задачи</title>
+<title>Покупки</title>
 </head>
 <body>
 <main>
-  <h1>Задачи</h1>
-  <form id="form">
-    <input id="text" placeholder="Что нужно сделать?" autocomplete="off" required>
-    <button>Добавить</button>
-  </form>
-  <nav id="tabs">
-    <button data-mode="all" class="on">Все</button>
-    <button data-mode="active">Активные</button>
-    <button data-mode="done">Готово</button>
-  </nav>
+  <h1>Покупки</h1>
+  <div class="row">
+    <button id="scan-add">Сканировать товар</button>
+    <button id="scan-shop" class="alt">В магазине</button>
+  </div>
   <ul id="list"></ul>
-  <p id="empty" hidden>Пока пусто</p>
-  <button id="clear" class="link">Убрать выполненные</button>
-  <button id="install" class="link" hidden>Установить приложение</button>
+  <p id="empty" hidden>Список пуст. Отсканируйте штрихкод товара.</p>
+  <div class="row">
+    <button id="share" class="link">Поделиться списком</button>
+    <button id="clear" class="link">Убрать купленное</button>
+    <button id="install" class="link" hidden>Установить приложение</button>
+  </div>
 </main>
+<section id="scanner" hidden>
+  <p id="hint"></p>
+  <video id="video" playsinline muted></video>
+  <form id="manual"><input id="code" inputmode="numeric" placeholder="или введите штрихкод" autocomplete="off"><button>OK</button></form>
+  <button id="close" class="alt">Закрыть</button>
+</section>
+<div id="toast" hidden></div>
 <script type="module" src="app.js"></script>
 </body>
 </html>
