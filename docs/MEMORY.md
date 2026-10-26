@@ -1,5 +1,5 @@
 # MEMORY — что нужно знать новой сессии
-Обновлено: 2026-10-26 UTC, запрос 20261026-020615-kea3
+Обновлено: 2026-10-26 UTC, запрос 20261026-020752-vvmv
 
 ## Цель
 Пустая база под новый проект + тестовый репозиторий моста claude-proxy (Telegram → Worker → routine). Сейчас: прототип ASCII-игры с настоящим освещением.
@@ -12,10 +12,10 @@
 - 2026-10-26: владелец решил переделать всё на Godot (стек в DECISIONS.md).
 
 ## Состояние
-Каркас Godot 4.3 в godot/ (GDScript, GL Compatibility, шейдер ASCII, тесты tests/run.gd, CI .github/workflows/godot.yml) — не запускался, проверит CI. Вариант 1 (Three.js) пока остаётся: src/index.html, main.js (сцена, персонаж, шейдер), ascii.js (рамп и затухание, тесты в tests/), vendor/three.module.js (Three r170 локально: CDN из песочницы недоступен). Ссылка: https://arteick.github.io/proxy-test/ (если деплой прошёл).
+Godot 4.3 в godot/ (GDScript, GL Compatibility, ASCII-шейдер, тесты tests/run.gd, CI godot.yml). Первый CI упал: class_name Ascii не виден без импорт-кэша, исправлено через preload (ascii.gd без class_name). Добавлено управление героем: WASD относительно камеры, камера следует, коллизии с колоннами (scripts/move.gd, тесты). Результат CI после правок — смотреть в Actions. Старый Three.js-прототип в src/ остаётся.
 
 ## Следующие шаги
-Запустить godot.yml, починить по логу; затем игровая часть (docs/ROADMAP.md).
+Убедиться, что godot.yml зелёный (тесты и Web-экспорт), чинить по логу; публикация Godot-сборки на Pages; поворот камеры мышью.
 
 ## Открытые вопросы
 Нравится ли стиль; какой проект делать на этой основе.
