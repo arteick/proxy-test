@@ -33,7 +33,7 @@ var crystal_nodes: Array = []
 var enemy_nodes: Array = []
 var dead_nodes: Array = [] # убитые мыши: узел со светом не удаляем (смена числа источников в вебе вешает кадр), а паркуем далеко
 var hud: Label
-var ascii_mat: ShaderMaterial
+var postfx := Postfx.new()
 var marker := Move.marker_scale(Move.ZOOM_FIXED) # масштаб значков, считается один раз (зум фиксирован)
 var last_hud := ""
 var run_seed := 1
@@ -56,8 +56,8 @@ func _ready() -> void:
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 	cam.size = Move.ortho_size(zoom)
 	add_child(cam)
-	ascii_mat = Postfx.build(self, cam)
-	ascii_mat.set_shader_parameter("far_blend", Move.far_blend(zoom))
+	postfx.build(self, cam)
+	postfx.ascii.set_shader_parameter("far_blend", Move.far_blend(zoom))
 	fire_node = Campfire.make_node(self)
 	add_child(spells)
 	spells.setup(hero, cam)
@@ -131,6 +131,7 @@ func _update_game(dt: float) -> void:
 
 func _process(delta: float) -> void:
 	perf.update(delta)
+	postfx.update(delta)
 	var dt := minf(delta, 0.05) # просадка кадра не должна растягиваться в рывок через стены и шары
 	t += dt
 	if warm:
