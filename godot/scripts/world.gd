@@ -29,6 +29,7 @@ var t := 0.0
 var game: Game
 var crystal_nodes: Array = []
 var enemy_nodes: Array = []
+var dead_nodes: Array = [] # убитые мыши: узел со светом не удаляем (смена числа источников в вебе вешает кадр), а паркуем далеко
 var hud: Label
 var ascii_mat: ShaderMaterial
 var marker := Move.marker_scale(Move.ZOOM_FIXED) # масштаб значков, считается один раз (зум фиксирован)
@@ -66,8 +67,9 @@ func _ready() -> void:
 	_new_game()
 
 func _new_game() -> void:
-	for n in crystal_nodes + enemy_nodes:
+	for n in crystal_nodes + enemy_nodes + dead_nodes:
 		n.queue_free()
+	dead_nodes = []
 	game = Game.new(run_seed)
 	run_seed += 1
 	hero.position = Vector3.ZERO
@@ -79,7 +81,8 @@ func _on_explosion(at: Vector3) -> void:
 	if game.state != "play":
 		return
 	for i in game.blast(Vector2(at.x, at.z)):
-		enemy_nodes[i].queue_free()
+		enemy_nodes[i].position = Vector3(0, -500, 0)
+		dead_nodes.append(enemy_nodes[i])
 		enemy_nodes.remove_at(i)
 		light.flash()
 
