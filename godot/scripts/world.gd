@@ -32,7 +32,7 @@ var ascii_mat: ShaderMaterial
 var run_seed := 1
 
 func _ready() -> void:
-	colliders = Level.build(self)
+	colliders = Level.build(self) + Level.build_ruins(self)
 	add_child(hero)
 	add_child(light)
 
