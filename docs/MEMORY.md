@@ -12,7 +12,7 @@
 - 2026-10-26: владелец решил переделать всё на Godot (стек в DECISIONS.md).
 
 ## Состояние
-Godot 4.3 в godot/ (GDScript, GL Compatibility, ASCII-шейдер, тесты tests/run.gd, CI godot.yml). Первый CI упал: class_name Ascii не виден без импорт-кэша, исправлено через preload (ascii.gd без class_name). Добавлено управление героем: WASD относительно камеры, камера следует, коллизии с колоннами (scripts/move.gd, тесты). Результат CI после правок — смотреть в Actions. Старый Three.js-прототип в src/ остаётся.
+Godot 4.3 в godot/ (GDScript, GL Compatibility, ASCII-шейдер, тесты tests/run.gd, CI godot.yml). Первый CI упал: class_name Ascii не виден без импорт-кэша, исправлено через preload (ascii.gd без class_name). Добавлено управление героем: WASD относительно камеры, камера следует, коллизии с колоннами (scripts/move.gd, тесты). Второй CI-прогон: тесты логики прошли, упал экспорт Web (нет шаблонов в HOME контейнера, неполный export_presets.cfg) — исправлено в workflow и пресете, результат прогона не подтверждён: смотреть в Actions. Старый Three.js-прототип в src/ остаётся.
 
 ## Следующие шаги
 Убедиться, что godot.yml зелёный (тесты и Web-экспорт), чинить по логу; публикация Godot-сборки на Pages; поворот камеры мышью.
