@@ -162,8 +162,7 @@ func _process(delta: float) -> void:
 	hero.casting = spells.charging()
 	hero.animate(dt, moving, t)
 	var base := hero.position
-	var m := get_viewport().get_mouse_position() / Vector2(get_viewport().get_visible_rect().size)
-	light.follow(base, m, t, dt)
+	light.follow(base, t, dt)
 	var look := camfx.update(base, dt, t)
 	cam.position = Move.top_down_cam(look, yaw, zoom)
 	cam.look_at(look)

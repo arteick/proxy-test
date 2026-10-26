@@ -1,7 +1,8 @@
 extends Node3D
-# Окружение и свет: полусферное небо/земля, тёплый ключевой свет за курсором, холодный контровой.
+# Окружение и свет: полусферное небо/земля, тёплый ключевой свет над героем (за курсором не ходит), холодный контровой.
 
 const KEY_ENERGY := 6.0
+const KEY_OFFSET := Vector3(0.0, 3.7, 2.0) # над героем и чуть к камере
 
 var key: OmniLight3D
 
@@ -44,7 +45,7 @@ func _ready() -> void:
 func flash() -> void:
 	key.light_energy = 14.0
 
-# base — позиция героя, m — курсор в долях экрана (0..1), t — время.
-func follow(base: Vector3, m: Vector2, t: float, dt: float) -> void:
-	key.position = base + Vector3((m.x - 0.5) * 12.0, 1.2 + (1.0 - m.y) * 5.0, 2.0 + sin(t * 0.7))
+# base — позиция героя, t — время.
+func follow(base: Vector3, t: float, dt: float) -> void:
+	key.position = base + KEY_OFFSET + Vector3(0.0, 0.0, sin(t * 0.7))
 	key.light_energy = lerpf(key.light_energy, KEY_ENERGY, minf(1.0, dt * 5.0))
