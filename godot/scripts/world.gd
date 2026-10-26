@@ -28,6 +28,8 @@ var crystal_nodes: Array = []
 var enemy_nodes: Array = []
 var hud: Label
 var ascii_mat: ShaderMaterial
+var marker := Move.marker_scale(Move.ZOOM_FIXED) # масштаб значков, считается один раз (зум фиксирован)
+var last_hud := ""
 var run_seed := 1
 var spells := Spells.new()
 
@@ -42,6 +44,7 @@ func _ready() -> void:
 	cam.size = Move.ortho_size(zoom)
 	add_child(cam)
 	ascii_mat = Postfx.build(self, cam)
+	ascii_mat.set_shader_parameter("far_blend", Move.far_blend(zoom))
 	add_child(spells)
 	spells.setup(hero, cam)
 	spells.exploded.connect(_on_explosion)
@@ -85,7 +88,7 @@ func _update_game(dt: float) -> void:
 	for i in crystal_nodes.size():
 		crystal_nodes[i].position.y = 1.0 + sin(t * 2.0 + i) * 0.15
 		crystal_nodes[i].rotation.y = t
-		crystal_nodes[i].scale = Vector3.ONE * Move.marker_scale(zoom)
+		crystal_nodes[i].scale = Vector3.ONE * marker
 	for i in enemy_nodes.size():
 		var prev: Vector3 = enemy_nodes[i].position
 		var np := Vector3(game.enemies[i].x, 1.0 + sin(t * 3.0 + i) * 0.2, game.enemies[i].y)
@@ -94,10 +97,13 @@ func _update_game(dt: float) -> void:
 		if flying:
 			enemy_nodes[i].rotation.y = atan2(-(np.x - prev.x), -(np.z - prev.z))
 		Actors.animate_bat(enemy_nodes[i], t + i, flying)
-		enemy_nodes[i].scale = Vector3.ONE * Move.marker_scale(zoom)
+		enemy_nodes[i].scale = Vector3.ONE * marker
 	if ev.has("hurt"):
 		light.flash()
-	hud.text = Hud.text(game, hero.position)
+	var txt := Hud.text(game, hero.position)
+	if txt != last_hud: # Label пересчитывает раскладку при каждой записи текста
+		last_hud = txt
+		hud.text = txt
 
 func _process(dt: float) -> void:
 	t += dt
@@ -120,8 +126,5 @@ func _process(dt: float) -> void:
 	light.follow(base, m, t, dt)
 	cam.position = Move.top_down_cam(base, yaw, zoom)
 	cam.look_at(base)
-	cam.size = Move.ortho_size(zoom)
-	ascii_mat.set_shader_parameter("far_blend", Move.far_blend(zoom))
-	var ms := Move.marker_scale(zoom)
-	hero.scale = Vector3.ONE * ms
+	hero.scale = Vector3.ONE * marker
 	_update_game(dt)

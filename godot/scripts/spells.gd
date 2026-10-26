@@ -62,7 +62,8 @@ func _update_fireball(dt: float, t: float, ms: float, lmb: bool, rmb: bool, can_
 			ball = null
 		else:
 			Fireball.apply(ball_node, ball, ms, t)
-	for f in flying.duplicate():
+	for k in range(flying.size() - 1, -1, -1): # с конца: удаление без копии массива
+		var f: Array = flying[k]
 		f[0].update(dt, false, false)
 		var live: bool = f[0].state == "flying"
 		f[2].update(dt, f[0].pos, live)
@@ -78,7 +79,7 @@ func _update_fireball(dt: float, t: float, ms: float, lmb: bool, rmb: bool, can_
 			f[0].state = "gone" if f[0].state == "exploded" else f[0].state
 			if f[2].parts.is_empty():
 				f[3].queue_free()
-				flying.erase(f)
+				flying.remove_at(k)
 
 # Точка земли (y=0) под курсором; если луч не доходит до земли — прямо перед героем.
 func _cursor_ground(fallback: Vector3) -> Vector3:
@@ -96,10 +97,11 @@ func _explode(at: Vector3) -> void:
 		scorches.pop_front().queue_free()
 
 func _update_explosions(dt: float, ms: float) -> void:
-	for e in explosions.duplicate():
+	for k in range(explosions.size() - 1, -1, -1):
+		var e: Array = explosions[k]
 		e[0].update(dt)
 		if e[0].done():
 			e[1].queue_free()
-			explosions.erase(e)
+			explosions.remove_at(k)
 		else:
 			Explosion.apply(e[1], e[0], ms)

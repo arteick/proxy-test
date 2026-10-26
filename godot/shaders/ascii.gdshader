@@ -51,26 +51,29 @@ void fragment() {
 	float val = mix(cov, solid, far_blend);
 	vec3 tint = mix(vec3(1.0), col / max(lum, 0.04), 0.85);
 	vec3 outc = tint * val * (0.45 + 1.3 * lum) + col * 0.12;
-	// усреднение по ячейке и по соседям: шум пола сглаживается, а значки выделяются локальным контрастом
-	vec3 avg = vec3(0.0);
-	for (int i = 0; i < 4; i++) {
-		vec2 o = vec2(float(i % 2) - 0.5, float(i / 2) - 0.5) * 0.5 * step_uv;
-		avg += texture(screen_tex, cuv + o).rgb * 0.25;
+	// дальний вид считаем только когда он виден (иначе ~20 лишних выборок текстур на ячейку)
+	if (far_blend > 0.0) {
+		// усреднение по ячейке и по соседям: шум пола сглаживается, а значки выделяются локальным контрастом
+		vec3 avg = vec3(0.0);
+		for (int i = 0; i < 4; i++) {
+			vec2 o = vec2(float(i % 2) - 0.5, float(i / 2) - 0.5) * 0.5 * step_uv;
+			avg += texture(screen_tex, cuv + o).rgb * 0.25;
+		}
+		vec3 ring = vec3(0.0);
+		for (int j = 0; j < 8; j++) {
+			float a = float(j) * 0.785398;
+			ring += texture(screen_tex, cuv + vec2(cos(a), sin(a)) * step_uv * 2.5).rgb * 0.125;
+		}
+		vec3 pop = avg + (avg - ring) * 0.5;
+		float plum = dot(pop, vec3(0.299, 0.587, 0.114));
+		vec3 flat_c = max(mix(vec3(plum), pop, 1.2), 0.0) * 1.1 + 0.02;
+		// предметы над полом: глубина отличается от среднего по симметричному кольцу (плоскость пола кольцо гасит)
+		float dr = 0.25 * (lin_depth(depth_tex, cuv + vec2(step_uv.x, 0.0) * 2.0, INV_PROJECTION_MATRIX) + lin_depth(depth_tex, cuv - vec2(step_uv.x, 0.0) * 2.0, INV_PROJECTION_MATRIX)
+			+ lin_depth(depth_tex, cuv + vec2(0.0, step_uv.y) * 2.0, INV_PROJECTION_MATRIX) + lin_depth(depth_tex, cuv - vec2(0.0, step_uv.y) * 2.0, INV_PROJECTION_MATRIX));
+		float obj = smoothstep(0.25, 1.0, abs(d0 - dr));
+		flat_c *= mix(0.55, 1.6, obj);
+		outc = mix(outc, flat_c, far_blend);
 	}
-	vec3 ring = vec3(0.0);
-	for (int j = 0; j < 8; j++) {
-		float a = float(j) * 0.785398;
-		ring += texture(screen_tex, cuv + vec2(cos(a), sin(a)) * step_uv * 2.5).rgb * 0.125;
-	}
-	vec3 pop = avg + (avg - ring) * 0.5;
-	float plum = dot(pop, vec3(0.299, 0.587, 0.114));
-	vec3 flat_c = max(mix(vec3(plum), pop, 1.2), 0.0) * 1.1 + 0.02;
-	// предметы над полом: глубина отличается от среднего по симметричному кольцу (плоскость пола кольцо гасит)
-	float dr = 0.25 * (lin_depth(depth_tex, cuv + vec2(step_uv.x, 0.0) * 2.0, INV_PROJECTION_MATRIX) + lin_depth(depth_tex, cuv - vec2(step_uv.x, 0.0) * 2.0, INV_PROJECTION_MATRIX)
-		+ lin_depth(depth_tex, cuv + vec2(0.0, step_uv.y) * 2.0, INV_PROJECTION_MATRIX) + lin_depth(depth_tex, cuv - vec2(0.0, step_uv.y) * 2.0, INV_PROJECTION_MATRIX));
-	float obj = smoothstep(0.25, 1.0, abs(d0 - dr));
-	flat_c *= mix(0.55, 1.6, obj);
-	outc = mix(outc, flat_c, far_blend);
 	outc = mix(outc, outc * 0.25, outline * (0.5 + 0.5 * far_blend));
 	vec2 q = SCREEN_UV - 0.5;
 	outc *= 1.0 - dot(q, q) * 0.5;
