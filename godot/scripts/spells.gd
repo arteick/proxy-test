@@ -13,6 +13,8 @@ var ball_node: Node3D
 var flying: Array = [] # [Fireball, Node3D, Trail, Node3D шлейфа]
 var explosions: Array = [] # [Explosion, Node3D]
 var scorches: Array = []
+var ball_pool: Array = [] # узлы шара с OmniLight не удаляются (смена числа источников вешает веб): паркуются и берутся снова
+const BALL_POOL := 4
 var boom_seed := 1
 var hit_test: Callable # (Vector3) -> bool: шар коснулся врага
 var ball_blocked := false # после отмены ждём отпускания ЛКМ
@@ -20,6 +22,16 @@ var ball_blocked := false # после отмены ждём отпускани�
 func setup(hero_: Node3D, cam_: Camera3D) -> void:
 	hero = hero_
 	cam = cam_
+	for i in BALL_POOL:
+		_release_ball(Fireball.make_node(self))
+
+func _acquire_ball() -> Node3D:
+	return ball_pool.pop_back() if not ball_pool.is_empty() else Fireball.make_node(self)
+
+func _release_ball(n: Node3D) -> void:
+	n.position = Vector3(0, -500, 0)
+	n.get_meta("light").light_energy = 0.001
+	ball_pool.append(n)
 
 func charging() -> bool:
 	return ball != null and ball.state == "charging"
@@ -45,7 +57,7 @@ func _update_fireball(dt: float, t: float, ms: float, lmb: bool, rmb: bool, can_
 		ball_blocked = false
 	if ball == null and lmb and not rmb and not ball_blocked and can_cast:
 		ball = Fireball.new()
-		ball_node = Fireball.make_node(self)
+		ball_node = _acquire_ball()
 	if ball != null:
 		ball.update(dt, lmb, rmb)
 		ball.pos = hero.position + Vector3(0, 3.7 * ms, 0)
@@ -59,7 +71,7 @@ func _update_fireball(dt: float, t: float, ms: float, lmb: bool, rmb: bool, can_
 			flying.append([ball, ball_node, Trail.new(), Trail.make_node(self)])
 			ball = null
 		elif ball.state == "gone":
-			ball_node.queue_free()
+			_release_ball(ball_node)
 			ball = null
 		else:
 			Fireball.apply(ball_node, ball, ms, t)
@@ -74,8 +86,8 @@ func _update_fireball(dt: float, t: float, ms: float, lmb: bool, rmb: bool, can_
 		if f[0].state == "exploded":
 			_explode(f[0].pos)
 		if f[0].state == "exploded" or f[0].state == "gone":
-			if not f[1].is_queued_for_deletion(): # шлейф живёт ещё ~0.5 с — узел шара освобождаем один раз
-				f[1].queue_free()
+			if not ball_pool.has(f[1]): # шлейф живёт ещё ~0.5 с — узел шара возвращаем один раз
+				_release_ball(f[1])
 		else:
 			Fireball.apply(f[1], f[0], ms, t)
 		if not live:
