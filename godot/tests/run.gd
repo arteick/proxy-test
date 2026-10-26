@@ -1,6 +1,7 @@
 extends SceneTree
 const Ascii = preload("res://scripts/ascii.gd")
 const Move = preload("res://scripts/move.gd")
+const Game = preload("res://scripts/game.gd")
 # Запуск: godot --headless --path godot -s tests/run.gd
 
 var fails := 0
@@ -23,4 +24,30 @@ func _init() -> void:
 	var p := Move.step(Vector3(0, 0, 3), Vector3(0, 0, -1), 2.0, 1.0, 0.5, wall)
 	check(p.z >= 1.5 - 0.001, "коллизия: не заходит в колонну")
 	check(Move.step(Vector3(5, 0, 5), Vector3(1, 0, 0), 2.0, 0.5, 0.5, wall).x == 6.0, "движение без препятствий")
+	var g := Game.new(7)
+	check(g.crystals.size() == Game.CRYSTALS and g.enemies.size() == Game.ENEMIES, "игра: старт, кристаллы и тени")
+	check(Game.new(7).crystals == g.crystals and Game.new(8).crystals != g.crystals, "игра: seed детерминирован")
+	var c0: Vector2 = g.crystals[0]
+	g.enemies = [Vector2(500, 500)]
+	g.homes = g.enemies.duplicate()
+	var ev := g.update(Vector3(c0.x, 0, c0.y), 0.016)
+	check(ev.has("pick") and g.score == 1 and g.crystals.size() == Game.CRYSTALS - 1, "игра: подбор кристалла")
+	g.enemies = [Vector2(0, 0)]
+	g.homes = g.enemies.duplicate()
+	var far_hero := Vector3(0, 0, 8)
+	g.update(far_hero, 1.0)
+	check(g.enemies[0].y > 2.0 and g.enemies[0].y < 4.0, "игра: тень идёт к герою со своей скоростью")
+	g.enemies = [Vector2(0, 8)]
+	check(g.update(far_hero, 0.016).has("hurt") and g.hp == Game.HP_MAX - 1, "игра: касание тени отнимает жизнь")
+	g.update(far_hero, 0.016)
+	check(g.hp == Game.HP_MAX - 1, "игра: неуязвимость после удара")
+	g.hp = 1; g.hurt_cd = 0.0
+	check(g.update(far_hero, 0.016).has("lose") and g.state == "lose", "игра: поражение")
+	check(g.update(far_hero, 1.0).is_empty(), "игра: после конца события не идут")
+	var w := Game.new(3)
+	w.enemies = []; w.homes = []
+	var evs: Array = []
+	for c in w.crystals.duplicate():
+		evs = w.update(Vector3(c.x, 0, c.y), 0.016)
+	check(w.state == "win" and evs.has("win"), "игра: победа после последнего кристалла")
 	quit(1 if fails else 0)
