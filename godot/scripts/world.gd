@@ -1,8 +1,15 @@
 extends Node3D
 const Ascii = preload("res://scripts/ascii.gd")
+const Move = preload("res://scripts/move.gd")
 # Сцена целиком в коде: колонны, персонаж, свет, камера и ASCII-постобработка.
 
 const FAR := 60.0
+const SPEED := 5.0
+const HERO_R := 0.45
+
+var colliders: Array = []
+var yaw := 0.0
+var moving := false
 
 var cam: Camera3D
 var key: OmniLight3D
@@ -45,7 +52,10 @@ func _ready() -> void:
 		var h := 2.0 + (i % 4) * 1.2
 		var c := CylinderMesh.new()
 		c.top_radius = 0.5; c.bottom_radius = 0.6; c.height = h
-		_mesh(c, stone, Vector3((1 if i % 2 else -1) * 4.5, h / 2.0, -i * 4.5))
+		var cx := (1 if i % 2 else -1) * 4.5
+		var cz := -i * 4.5
+		_mesh(c, stone, Vector3(cx, h / 2.0, cz))
+		colliders.append(Vector3(cx, cz, 0.6))
 
 	_build_hero()
 
@@ -111,12 +121,19 @@ func _input(e: InputEvent) -> void:
 
 func _process(dt: float) -> void:
 	t += dt
-	var m := get_viewport().get_mouse_position() / Vector2(get_viewport().get_visible_rect().size)
-	var swing := sin(t * 3.0) * 0.6
+	var wasd := Vector2(
+		float(Input.is_key_pressed(KEY_D)) - float(Input.is_key_pressed(KEY_A)),
+		float(Input.is_key_pressed(KEY_W)) - float(Input.is_key_pressed(KEY_S)))
+	var dir := Move.wish_dir(wasd, yaw)
+	moving = dir != Vector3.ZERO
+	if moving:
+		hero.position = Move.step(hero.position, dir, SPEED, dt, HERO_R, colliders)
+		hero.rotation.y = lerp_angle(hero.rotation.y, atan2(-dir.x, -dir.z), minf(1.0, dt * 12.0))
+	var swing := sin(t * 9.0) * 0.6 if moving else 0.0
 	arm_l.rotation.x = swing; arm_r.rotation.x = -swing
 	leg_l.rotation.x = -swing; leg_r.rotation.x = swing
-	hero.position.y = absf(sin(t * 3.0)) * 0.06
-	hero.rotation.y = sin(t * 0.4) * 0.5
-	key.position = Vector3((m.x - 0.5) * 12.0, 1.2 + (1.0 - m.y) * 5.0, 2.0 + sin(t * 0.7))
-	cam.position = Vector3(0, 2.0 * zoom, 4.6 * zoom)
-	cam.look_at(Vector3(0, 1.5, -3))
+	var base := hero.position
+	var m := get_viewport().get_mouse_position() / Vector2(get_viewport().get_visible_rect().size)
+	key.position = base + Vector3((m.x - 0.5) * 12.0, 1.2 + (1.0 - m.y) * 5.0, 2.0 + sin(t * 0.7))
+	cam.position = base + Vector3(0, 2.0 * zoom + 1.0, 4.6 * zoom).rotated(Vector3.UP, yaw)
+	cam.look_at(base + Vector3(0, 1.5, 0))
