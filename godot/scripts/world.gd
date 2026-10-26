@@ -11,6 +11,8 @@ const Postfx = preload("res://scripts/postfx.gd")
 const Dash = preload("res://scripts/dash.gd")
 const Campfire = preload("res://scripts/campfire.gd")
 const Prewarm = preload("res://scripts/prewarm.gd")
+const Camfx = preload("res://scripts/camfx.gd")
+const Perf = preload("res://scripts/perf.gd")
 # Сцена целиком в коде: колонны, персонаж, свет, камера и ASCII-постобработка.
 
 const FAR := 60.0
@@ -41,6 +43,8 @@ var fire := Campfire.new()
 var fire_node: Node3D
 var warm: Node3D
 var warm_frames := Prewarm.FRAMES
+var camfx := Camfx.new()
+var perf := Perf.new()
 
 func _ready() -> void:
 	colliders = Level.build(self) + Level.build_ruins(self)
@@ -65,6 +69,7 @@ func _ready() -> void:
 	add_child(layer)
 	warm = Prewarm.make_node(hero)
 	_new_game()
+	camfx.snap(hero.position)
 
 func _new_game() -> void:
 	for n in crystal_nodes + enemy_nodes + dead_nodes:
@@ -73,6 +78,7 @@ func _new_game() -> void:
 	game = Game.new(run_seed)
 	run_seed += 1
 	hero.position = Vector3.ZERO
+	camfx.snap(hero.position)
 	dash = Dash.new()
 	crystal_nodes = Actors.spawn_crystals(self, game.crystals)
 	enemy_nodes = Actors.spawn_enemies(self, game.enemies)
@@ -85,6 +91,7 @@ func _on_explosion(at: Vector3) -> void:
 		dead_nodes.append(enemy_nodes[i])
 		enemy_nodes.remove_at(i)
 		light.flash()
+		camfx.kick(0.5)
 
 func _unhandled_key_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and e.physical_keycode == KEY_R:
@@ -116,12 +123,14 @@ func _update_game(dt: float) -> void:
 		enemy_nodes[i].scale = Vector3.ONE * marker
 	if ev.has("hurt"):
 		light.flash()
-	var txt := Hud.text(game, hero.position, dash.charge())
+		camfx.kick(0.8)
+	var txt := Hud.text(game, hero.position, dash.charge()) + "\n" + perf.text()
 	if txt != last_hud: # Label пересчитывает раскладку при каждой записи текста
 		last_hud = txt
 		hud.text = txt
 
 func _process(delta: float) -> void:
+	perf.update(delta)
 	var dt := minf(delta, 0.05) # просадка кадра не должна растягиваться в рывок через стены и шары
 	t += dt
 	if warm:
@@ -154,7 +163,8 @@ func _process(delta: float) -> void:
 	var base := hero.position
 	var m := get_viewport().get_mouse_position() / Vector2(get_viewport().get_visible_rect().size)
 	light.follow(base, m, t, dt)
-	cam.position = Move.top_down_cam(base, yaw, zoom)
-	cam.look_at(base)
+	var look := camfx.update(base, dt, t)
+	cam.position = Move.top_down_cam(look, yaw, zoom)
+	cam.look_at(look)
 	hero.scale = Vector3.ONE * marker
 	_update_game(dt)

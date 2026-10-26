@@ -4,6 +4,8 @@ const Move = preload("res://scripts/move.gd")
 const Game = preload("res://scripts/game.gd")
 const Hero = preload("res://scripts/hero.gd")
 const Hud = preload("res://scripts/hud.gd")
+const Camfx = preload("res://scripts/camfx.gd")
+const Perf = preload("res://scripts/perf.gd")
 const Level = preload("res://scripts/level.gd")
 const Actors = preload("res://scripts/actors.gd")
 const Fireball = preload("res://scripts/fireball.gd")
@@ -211,6 +213,26 @@ func _init() -> void:
 			rose = rose and cf.smoke_pos().y <= Campfire.SMOKE_BASE_Y + Campfire.SMOKE_RISE + 0.001
 	check(seen > 0 and seen < 400 and rose, "костёр: дым по одной частице, не выше одного символа")
 	check(Campfire.new().smoke_pos() == null and Campfire.new().smoke_alpha() == 0.0, "костёр: сначала дыма нет")
+	var cx := Camfx.new()
+	var cx_goal := Vector3(10, 0, 0)
+	var cx_look := cx.update(cx_goal, 0.016, 0.0)
+	check(cx_look.x > 0.0 and cx_look.x < 10.0, "камера: плавно догоняет героя")
+	for k in 300:
+		cx_look = cx.update(cx_goal, 0.016, 0.0)
+	check(cx_look.distance_to(cx_goal) < 0.01, "камера: догнала героя")
+	cx.kick(5.0)
+	check(cx.shake == 1.0, "камера: тряска ограничена")
+	var cx_off := cx.update(cx_goal, 0.016, 0.3).distance_to(cx_goal)
+	check(cx_off > 0.0 and cx_off <= Camfx.SHAKE_MAX, "камера: тряска смещает не дальше предела")
+	for k in 100:
+		cx.update(cx_goal, 0.016, 0.3)
+	check(cx.shake == 0.0, "камера: тряска затухает")
+	cx.snap(Vector3.ZERO)
+	check(cx.focus == Vector3.ZERO, "камера: snap")
+	var pf := Perf.new()
+	for k in 60:
+		pf.update(0.016 if k != 10 else 0.2)
+	check(pf.peak_ms == 200 and pf.fps > 0 and pf.text().contains("200 мс"), "счётчик кадров: пик и fps за окно")
 	var pw := Prewarm.chars()
 	var covered := true
 	for c in Explosion.CHARS + Trail.CHARS + Campfire.SMOKE_CHARS + Campfire.ROW_CHARS[0] + Campfire.ROW_CHARS[3]:
