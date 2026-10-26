@@ -54,6 +54,7 @@ func _ready() -> void:
 	add_child(spells)
 	spells.setup(hero, cam)
 	spells.exploded.connect(_on_explosion)
+	spells.hit_test = func(p: Vector3) -> bool: return game.state == "play" and game.ball_hit(Vector2(p.x, p.z)) >= 0
 	hud = Hud.make_label()
 	var layer := CanvasLayer.new()
 	layer.add_child(hud)

@@ -11,6 +11,7 @@ const HP_MAX := 5          # жизни героя
 const ENEMY_HP := 3        # жизни каждой мыши, у всех одинаково
 const FIREBALL_DMG := 9999   # пока шар убивает любую мышь с одного попадания
 const BLAST_R := 2.5
+const BALL_HIT_R := 0.9    # шар в полёте взрывается, коснувшись мыши
 const INVULN := 1.2
 
 var crystals: Array = []   # Vector2(x, z)
@@ -67,16 +68,30 @@ func update(hero: Vector3, dt: float) -> Array:
 		ev.append("win")
 	return ev
 
-# Взрыв шара в точке (x, z): мыши в радиусе теряют жизни. Возвращает индексы убитых (по убыванию), их уже убрали из массивов.
+# Мышь, которой касается шар в точке (x, z): индекс или -1.
+func ball_hit(at: Vector2) -> int:
+	return _nearest(at, BALL_HIT_R)
+
+# Взрыв шара в точке (x, z): страдает только ближайшая мышь в радиусе (остальные целы). Возвращает индексы убитых, их уже убрали из массивов.
 func blast(at: Vector2, dmg: int = FIREBALL_DMG) -> Array:
-	var dead: Array = []
-	for i in range(enemies.size() - 1, -1, -1):
-		if enemies[i].distance_to(at) <= BLAST_R:
-			enemy_hp[i] -= dmg
-			if enemy_hp[i] <= 0:
-				enemies.remove_at(i)
-				homes.remove_at(i)
-				enemy_hp.remove_at(i)
-				dead.append(i)
-				kills += 1
-	return dead
+	var i := _nearest(at, BLAST_R)
+	if i < 0:
+		return []
+	enemy_hp[i] -= dmg
+	if enemy_hp[i] > 0:
+		return []
+	enemies.remove_at(i)
+	homes.remove_at(i)
+	enemy_hp.remove_at(i)
+	kills += 1
+	return [i]
+
+func _nearest(at: Vector2, r: float) -> int:
+	var best := -1
+	var bd := r
+	for i in enemies.size():
+		var d: float = enemies[i].distance_to(at)
+		if d <= bd:
+			best = i
+			bd = d
+	return best

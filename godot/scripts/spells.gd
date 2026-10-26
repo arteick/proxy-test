@@ -14,6 +14,7 @@ var flying: Array = [] # [Fireball, Node3D, Trail, Node3D шлейфа]
 var explosions: Array = [] # [Explosion, Node3D]
 var scorches: Array = []
 var boom_seed := 1
+var hit_test: Callable # (Vector3) -> bool: шар коснулся врага
 var ball_blocked := false # после отмены ждём отпускания ЛКМ
 
 func setup(hero_: Node3D, cam_: Camera3D) -> void:
@@ -65,6 +66,8 @@ func _update_fireball(dt: float, t: float, ms: float, lmb: bool, rmb: bool, can_
 	for k in range(flying.size() - 1, -1, -1): # с конца: удаление без копии массива
 		var f: Array = flying[k]
 		f[0].update(dt, false, false)
+		if f[0].state == "flying" and hit_test.is_valid() and hit_test.call(f[0].pos):
+			f[0].state = "exploded" # попал в мышь по пути — взрыв на месте
 		var live: bool = f[0].state == "flying"
 		f[2].update(dt, f[0].pos, live)
 		Trail.apply(f[3], f[2], ms)

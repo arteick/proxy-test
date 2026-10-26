@@ -71,8 +71,13 @@ func _init() -> void:
 	bg.enemies = [Vector2(0, 0), Vector2(1, 0), Vector2(50, 0)]
 	bg.homes = bg.enemies.duplicate()
 	bg.enemy_hp = [1, 3, 3]
-	check(bg.blast(Vector2(0, 0), 1) == [0] and bg.enemies.size() == 2 and bg.enemy_hp == [2, 3] and bg.homes.size() == 2, "взрыв: ранит в радиусе, убивает без жизней, дальние целы")
-	check(bg.kills == 1 and bg.blast(Vector2(1, 0)) == [0] and bg.kills == 2 and bg.enemies == [Vector2(50, 0)] and bg.blast(Vector2(50, 0)) == [0] and bg.enemies.is_empty(), "шар убивает мышь с одного попадания, убийства считаются")
+	check(bg.ball_hit(Vector2(0.4, 0)) == 0 and bg.ball_hit(Vector2(10, 0)) == -1, "шар касается мыши только вблизи")
+	check(bg.blast(Vector2(0.4, 0), 1) == [0] and bg.enemies.size() == 2 and bg.enemy_hp == [3, 3] and bg.homes.size() == 2, "взрыв: ранит только ближайшую мышь, убивает без жизней")
+	check(bg.kills == 1 and bg.blast(Vector2(0.9, 0)) == [0] and bg.kills == 2 and bg.enemies == [Vector2(50, 0)] and bg.blast(Vector2(50, 0)) == [0] and bg.enemies.is_empty(), "шар убивает мышь с одного попадания, убийства считаются")
+	bg.enemies = [Vector2(0, 0), Vector2(1, 0)]
+	bg.homes = bg.enemies.duplicate()
+	bg.enemy_hp = [Game.ENEMY_HP, Game.ENEMY_HP]
+	check(bg.blast(Vector2(0.3, 0)) == [0] and bg.enemies == [Vector2(1, 0)] and bg.enemy_hp.size() == 1, "взрыв рядом с двумя мышами убивает одну, не всех")
 	var w := Game.new(3)
 	w.enemies = []; w.homes = []
 	var evs: Array = []
