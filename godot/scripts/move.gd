@@ -20,3 +20,9 @@ static func resolve(pos: Vector3, hero_r: float, colliders: Array) -> Vector3:
 
 static func step(pos: Vector3, dir: Vector3, speed: float, dt: float, hero_r: float, colliders: Array) -> Vector3:
 	return resolve(pos + dir * speed * dt, hero_r, colliders)
+
+# Поворот камеры от движения мыши: rel — сдвиг в пикселях, pitch ограничен, чтобы камера не уходила под землю и за зенит.
+const PITCH_MIN := -0.15
+const PITCH_MAX := 1.2
+static func look(yaw: float, pitch: float, rel: Vector2, sens: float) -> Vector2:
+	return Vector2(yaw - rel.x * sens, clampf(pitch + rel.y * sens, PITCH_MIN, PITCH_MAX))
