@@ -2,13 +2,14 @@ extends Node3D
 const Move = preload("res://scripts/move.gd")
 const Fireball = preload("res://scripts/fireball.gd")
 const Explosion = preload("res://scripts/explosion.gd")
+const Trail = preload("res://scripts/trail.gd")
 # Заклинания: огненный шар (накопление, полёт, отмена), взрывы и выжженные пятна.
 
 var hero: Node3D
 var cam: Camera3D
 var ball: Fireball # шар, который копится над головой
 var ball_node: Node3D
-var flying: Array = [] # [Fireball, Node3D]
+var flying: Array = [] # [Fireball, Node3D, Trail, Node3D шлейфа]
 var explosions: Array = [] # [Explosion, Node3D]
 var scorches: Array = []
 var boom_seed := 1
@@ -53,7 +54,7 @@ func _update_fireball(dt: float, t: float, ms: float, lmb: bool, rmb: bool, can_
 			var target := Fireball.aim_target(hero.position, _cursor_ground(hero.position))
 			var fwd := (target - hero.position) * Vector3(1, 0, 1)
 			ball.launch(from + fwd.normalized() * 0.8, target)
-			flying.append([ball, ball_node])
+			flying.append([ball, ball_node, Trail.new(), Trail.make_node(self)])
 			ball = null
 		elif ball.state == "gone":
 			ball_node.queue_free()
@@ -62,15 +63,21 @@ func _update_fireball(dt: float, t: float, ms: float, lmb: bool, rmb: bool, can_
 			Fireball.apply(ball_node, ball, ms, t)
 	for f in flying.duplicate():
 		f[0].update(dt, false, false)
+		var live: bool = f[0].state == "flying"
+		f[2].update(dt, f[0].pos, live)
+		Trail.apply(f[3], f[2], ms)
 		if f[0].state == "exploded":
 			_explode(f[0].pos)
 			f[1].queue_free()
-			flying.erase(f)
 		elif f[0].state == "gone":
 			f[1].queue_free()
-			flying.erase(f)
 		else:
 			Fireball.apply(f[1], f[0], ms, t)
+		if not live:
+			f[0].state = "gone" if f[0].state == "exploded" else f[0].state
+			if f[2].parts.is_empty():
+				f[3].queue_free()
+				flying.erase(f)
 
 # Точка земли (y=0) под курсором; если луч не доходит до земли — прямо перед героем.
 func _cursor_ground(fallback: Vector3) -> Vector3:
