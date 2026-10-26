@@ -100,7 +100,13 @@ func _update_game(dt: float) -> void:
 		crystal_nodes[i].rotation.y = t
 		crystal_nodes[i].scale = Vector3.ONE * Move.marker_scale(zoom)
 	for i in enemy_nodes.size():
-		enemy_nodes[i].position = Vector3(game.enemies[i].x, 1.0 + sin(t * 3.0 + i) * 0.2, game.enemies[i].y)
+		var prev: Vector3 = enemy_nodes[i].position
+		var np := Vector3(game.enemies[i].x, 1.0 + sin(t * 3.0 + i) * 0.2, game.enemies[i].y)
+		var flying := Vector2(np.x - prev.x, np.z - prev.z).length() > 0.0005
+		enemy_nodes[i].position = np
+		if flying:
+			enemy_nodes[i].rotation.y = atan2(-(np.x - prev.x), -(np.z - prev.z))
+		Actors.animate_bat(enemy_nodes[i], t + i, flying)
 		enemy_nodes[i].scale = Vector3.ONE * Move.marker_scale(zoom)
 	if ev.has("hurt"):
 		light.flash()

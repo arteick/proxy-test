@@ -82,5 +82,14 @@ func _init() -> void:
 	check(fi.get_width() == Level.TILE * 8 and fi.get_pixel(5, 5) != fi.get_pixel(40, 40), "пол: текстура с вариацией")
 	check(Level.build(root).size() == Level.COLUMNS and root.get_child_count() == Level.COLUMNS + 1, "уровень: колонны и коллайдеры")
 	check(Actors.spawn_crystals(root, Game.new(2).crystals).size() == Game.CRYSTALS and Actors.spawn_enemies(root, Game.new(2).enemies).size() == Game.ENEMIES, "узлы: кристаллы и тени")
+	var bat := Actors.make_bat(root, Vector3.ZERO)
+	Actors.animate_bat(bat, 0.1, true)
+	check(bat.get_meta("wing_l").rotation.z == -bat.get_meta("wing_r").rotation.z and bat.get_meta("wing_r").rotation.z != 0.0, "мышь: крылья машут симметрично")
+	var amp_move := 0.0
+	var amp_idle := 0.0
+	for k in 100:
+		amp_move = maxf(amp_move, absf(Actors.flap_angle(k * 0.01, true)))
+		amp_idle = maxf(amp_idle, absf(Actors.flap_angle(k * 0.01, false)))
+	check(amp_move > 0.3 and amp_idle > 0.1 and Actors.WING_FLAP_MOVE > Actors.WING_FLAP_IDLE, "мышь: крылья шевелятся и в движении, и на месте (в движении быстрее)")
 	root.free()
 	quit(1 if fails else 0)
