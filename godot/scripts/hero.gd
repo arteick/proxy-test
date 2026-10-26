@@ -5,7 +5,7 @@ const CAPE_SEGS := 4
 const CAPE_LEN := 0.42
 const STAFF_GRIP := 1.0 # высота pivot посоха над землёй (низ шеста = 0)
 const STAFF_Z := -0.55 # посох впереди героя (он смотрит в -Z)
-const ARM_REACH := -0.7 # правая рука вынесена вперёд к посоху
+const ARM_REACH := 0.7 # правая рука вынесена вперёд к посоху (+rotation.x по X тянет кисть в -Z)
 
 var body := Node3D.new()
 var staff := Node3D.new()
