@@ -1,4 +1,5 @@
 extends Node3D
+const Ascii = preload("res://scripts/ascii.gd")
 # Сцена целиком в коде: колонны, персонаж, свет, камера и ASCII-постобработка.
 
 const FAR := 60.0

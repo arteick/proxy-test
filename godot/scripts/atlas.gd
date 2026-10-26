@@ -1,4 +1,5 @@
 extends SubViewport
+const Ascii = preload("res://scripts/ascii.gd")
 # Рисует строку RAMP в одну текстуру-атлас: по одной ячейке G×G на символ.
 
 const G := 32

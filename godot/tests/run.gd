@@ -1,4 +1,5 @@
 extends SceneTree
+const Ascii = preload("res://scripts/ascii.gd")
 # Запуск: godot --headless --path godot -s tests/run.gd
 
 var fails := 0
