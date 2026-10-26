@@ -26,7 +26,12 @@ void fragment() {
 	vec2 cuv = (cell_id + 0.5) * cell / res;
 	vec2 step_uv = vec2(cell) / res;
 
-	vec3 col = texture(screen_tex, cuv).rgb;
+	// цвет усредняется по площади ячейки (3x3 точки): один пиксель в центре рябил при движении
+	vec3 col = vec3(0.0);
+	for (int k = 0; k < 9; k++) {
+		vec2 o = (vec2(float(k % 3), float(k / 3)) - 1.0) * 0.33 * step_uv;
+		col += texture(screen_tex, cuv + o).rgb / 9.0;
+	}
 	float lum = dot(col, vec3(0.299, 0.587, 0.114));
 	lum = pow(clamp(lum * 1.2, 0.0, 1.0), 0.8);
 	// разнообразие: соседние по яркости символы выбираются по хэшу ячейки, поэтому ровные поверхности не залиты одним знаком
