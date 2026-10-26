@@ -73,9 +73,9 @@ func _update_fireball(dt: float, t: float, ms: float, lmb: bool, rmb: bool, can_
 		Trail.apply(f[3], f[2], ms)
 		if f[0].state == "exploded":
 			_explode(f[0].pos)
-			f[1].queue_free()
-		elif f[0].state == "gone":
-			f[1].queue_free()
+		if f[0].state == "exploded" or f[0].state == "gone":
+			if not f[1].is_queued_for_deletion(): # шлейф живёт ещё ~0.5 с — узел шара освобождаем один раз
+				f[1].queue_free()
 		else:
 			Fireball.apply(f[1], f[0], ms, t)
 		if not live:
