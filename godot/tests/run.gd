@@ -33,6 +33,7 @@ func _init() -> void:
 	check(Move.ortho_size(2.0) > Move.ortho_size(1.0) and Move.ortho_size(99.0) == Move.ORTHO_SIZE * Move.ZOOM_MAX, "камера: масштаб растёт и ограничен")
 	check(Move.marker_scale(1.0) == 1.0 and Move.marker_scale(Move.ZOOM_MAX) > 2.5, "значки: на дальнем масштабе крупнее")
 	check(Move.far_blend(1.0) == 0.0 and Move.far_blend(Move.ZOOM_MAX) == 1.0, "дальний вид: плоские цвета только вдали")
+	check(Move.ZOOM_FIXED == (Move.ZOOM_MIN + Move.ZOOM_MAX) / 2.0, "камера: фиксированный масштаб — середина диапазона")
 	var lk := Move.look(0.0, 0.5, Vector2(100, 0), 0.01)
 	check(is_equal_approx(lk.x, -1.0) and is_equal_approx(lk.y, 0.5), "камера: мышь вправо поворачивает yaw")
 	check(is_equal_approx(Move.look(0.0, 0.5, Vector2(0, 1000), 0.01).y, Move.PITCH_MAX) and is_equal_approx(Move.look(0.0, 0.5, Vector2(0, -1000), 0.01).y, Move.PITCH_MIN), "камера: наклон ограничен")

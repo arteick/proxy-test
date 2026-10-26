@@ -22,7 +22,7 @@ var cam: Camera3D
 var light := Lighting.new()
 var hero := Hero.new()
 var pitch := Move.TOP_PITCH
-var zoom := 1.0
+var zoom := Move.ZOOM_FIXED
 var t := 0.0
 var game: Game
 var crystal_nodes: Array = []
@@ -74,12 +74,6 @@ func _build_ascii_pass() -> void:
 	mi.material_override = mat
 	mi.extra_cull_margin = 16384.0
 	cam.add_child(mi)
-
-func _input(e: InputEvent) -> void:
-	# вид сверху: наклон фиксирован, мышь камеру не крутит; колесо — масштаб
-	if e is InputEventMouseButton and e.pressed:
-		if e.button_index == MOUSE_BUTTON_WHEEL_DOWN: zoom = minf(Move.ZOOM_MAX, zoom * 1.08)
-		if e.button_index == MOUSE_BUTTON_WHEEL_UP: zoom = maxf(Move.ZOOM_MIN, zoom * 0.93)
 
 func _unhandled_key_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and e.physical_keycode == KEY_R:
