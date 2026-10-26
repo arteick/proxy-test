@@ -3,6 +3,9 @@ const Ascii = preload("res://scripts/ascii.gd")
 const Move = preload("res://scripts/move.gd")
 const Game = preload("res://scripts/game.gd")
 const Hero = preload("res://scripts/hero.gd")
+const Hud = preload("res://scripts/hud.gd")
+const Level = preload("res://scripts/level.gd")
+const Actors = preload("res://scripts/actors.gd")
 # Запуск: godot --headless --path godot -s tests/run.gd
 
 var fails := 0
@@ -59,4 +62,15 @@ func _init() -> void:
 	check(hero.cape_segs.size() == Hero.CAPE_SEGS and hero.get_child_count() > 2, "герой: модель собирается")
 	hero.animate(0.1, true, 0.1)
 	check(hero.amp > 0.0 and hero.staff.rotation.x != 0.0, "герой: анимация ходьбы двигает суставы")
+	var gh := Game.new(1)
+	var txt := Hud.text(gh, Vector3.ZERO)
+	check(txt.contains("Кристаллы 0/8") and txt.contains("♥♥♥") and txt.contains("Ближайший"), "HUD: счёт, жизни, подсказка")
+	gh.state = "win"
+	check(Hud.text(gh, Vector3.ZERO).contains("Победа"), "HUD: победа")
+	gh.state = "lose"; gh.hp = 0
+	check(Hud.text(gh, Vector3.ZERO).contains("Тени взяли") and Hud.text(gh, Vector3.ZERO).contains("···"), "HUD: поражение, жизни не уходят в минус")
+	var root := Node3D.new()
+	check(Level.build(root).size() == Level.COLUMNS and root.get_child_count() == Level.COLUMNS + 1, "уровень: колонны и коллайдеры")
+	check(Actors.spawn_crystals(root, Game.new(2).crystals).size() == Game.CRYSTALS and Actors.spawn_enemies(root, Game.new(2).enemies).size() == Game.ENEMIES, "узлы: кристаллы и тени")
+	root.free()
 	quit(1 if fails else 0)

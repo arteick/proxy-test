@@ -30,6 +30,7 @@ Godot 4.3 в godot/ (GDScript, GL Compatibility, ASCII-шейдер, тесты 
 - 2026-10-26: герой переделан по просьбе владельца: не «круглый», посох как опора, плащ-шлейф виляет; камера мышью (клик — захват, Esc — отпустить).
 
 - 2026-10-26: владелец попросил «рефакторинг» без деталей — вынес героя в scripts/hero.gd; дальше по желанию: свет/кристаллы/тени из world.gd в отдельные скрипты.
+- 2026-10-26: владелец: «полный рефакторинг» — world.gd (222→129 строк) разложен на level.gd, lighting.gd, actors.gd, hud.gd, props.gd; поведение не менялось.
 
 ## Следующие шаги
 CI зелёный (до MVP); проверить godot.yml на MVP; публикация Godot-сборки на Pages; правки владельца по MVP (баланс, звук, уровни). Godot для проверки: скачать 4.3 с GitHub releases в /tmp, xvfb-run для скриншотов.
@@ -38,4 +39,4 @@ CI зелёный (до MVP); проверить godot.yml на MVP; публи�
 Какие правки по MVP хочет владелец.
 
 ## Где что лежит
-godot/ — проект и тесты (godot/tests); scripts/: world.gd (сцена, свет, HUD), hero.gd (маг), game.gd (правила), move.gd, ascii.gd/atlas.gd, docs/chat/ — история, docs/PROGRESS.md — сделанное.
+godot/ — проект и тесты (godot/tests); scripts/: world.gd (сборка и цикл), level.gd (колонны), lighting.gd (свет), actors.gd (кристаллы/тени), hud.gd (текст HUD), props.gd (материалы), hero.gd (маг), game.gd (правила), move.gd, ascii.gd/atlas.gd, docs/chat/ — история, docs/PROGRESS.md — сделанное.
