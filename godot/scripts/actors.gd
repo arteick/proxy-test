@@ -16,7 +16,7 @@ static func spawn_crystals(parent: Node3D, points: Array) -> Array:
 	gem.emission_energy_multiplier = 2.0
 	var out: Array = []
 	for c in points:
-		out.append(_orb(parent, 0.3, 0.8, gem, Vector3(c.x, 1.0, c.y), Color("6fe6ff"), 8.0, 2.5))
+		out.append(_orb(parent, 0.3, 0.8, gem, Vector3(c.x, 1.0, c.y), Color("6fe6ff"), 5.0, 2.5))
 	return out
 
 const WING_FLAP_MOVE := 14.0
@@ -43,7 +43,7 @@ static func make_bat(parent: Node3D, pos: Vector3) -> Node3D:
 		Props.mesh(wing, red, Vector3(sx * 0.5, 0, 0), pivot)
 		bat.set_meta("wing_l" if sx < 0.0 else "wing_r", pivot)
 	var l := OmniLight3D.new()
-	l.light_color = Color("ff3050"); l.omni_range = 6.0; l.light_energy = 1.5
+	l.light_color = Color("ff3050"); l.omni_range = 4.0; l.light_energy = 1.5
 	bat.add_child(l)
 	return bat
 

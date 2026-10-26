@@ -31,6 +31,7 @@ func _ready() -> void:
 	key.light_energy = KEY_ENERGY
 	key.omni_attenuation = 1.4
 	key.shadow_enabled = true
+	key.omni_shadow_mode = OmniLight3D.SHADOW_DUAL_PARABOLOID # 2 прохода теней вместо 6 у куба — заметно легче в браузере
 	add_child(key)
 	var rim := OmniLight3D.new()
 	rim.light_color = Color("5aa0ff")

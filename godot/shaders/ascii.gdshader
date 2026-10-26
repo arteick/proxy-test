@@ -1,7 +1,7 @@
 shader_type spatial;
 render_mode unshaded, depth_test_disabled, skip_vertex_transform;
 
-uniform sampler2D screen_tex : hint_screen_texture, filter_nearest;
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear;
 uniform sampler2D depth_tex : hint_depth_texture, filter_nearest;
 uniform sampler2D atlas : filter_linear;
 uniform float cell = 8.0;
@@ -26,11 +26,11 @@ void fragment() {
 	vec2 cuv = (cell_id + 0.5) * cell / res;
 	vec2 step_uv = vec2(cell) / res;
 
-	// цвет усредняется по площади ячейки (3x3 точки): один пиксель в центре рябил при движении
+	// цвет усредняется по площади ячейки: 4 билинейные точки (каждая берёт 2x2 пикселя) вместо 9 — один пиксель в центре рябил при движении
 	vec3 col = vec3(0.0);
-	for (int k = 0; k < 9; k++) {
-		vec2 o = (vec2(float(k % 3), float(k / 3)) - 1.0) * 0.33 * step_uv;
-		col += texture(screen_tex, cuv + o).rgb / 9.0;
+	for (int k = 0; k < 4; k++) {
+		vec2 o = (vec2(float(k % 2), float(k / 2)) - 0.5) * 0.4 * step_uv;
+		col += texture(screen_tex, cuv + o).rgb * 0.25;
 	}
 	float lum = dot(col, vec3(0.299, 0.587, 0.114));
 	lum = pow(clamp(lum * 1.2, 0.0, 1.0), 0.8);
