@@ -45,7 +45,7 @@ const TOP_DIST := 30.0
 const ORTHO_SIZE := 16.0  # высота кадра в метрах при zoom = 1
 const ZOOM_MIN := 0.5
 const ZOOM_MAX := 3.5
-const ZOOM_FIXED := 1.2  # фиксированный масштаб: близко, текстуры читаются (был 2.0)
+const ZOOM_FIXED := 1.02  # фиксированный масштаб: на 15% ближе прежнего 1.2 — текстуры крупнее
 static func top_down_cam(base: Vector3, yaw: float, _zoom: float = 1.0) -> Vector3:
 	return base + Vector3(0, 0, TOP_DIST).rotated(Vector3.RIGHT, -TOP_PITCH).rotated(Vector3.UP, yaw)
 
