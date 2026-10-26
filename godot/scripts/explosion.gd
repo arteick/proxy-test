@@ -78,6 +78,18 @@ static func apply(n: Node3D, ex, scale_k: float) -> void:
 		l.scale = Vector3.ONE * scale_k
 		l.modulate.a = a
 
+static var _scorch_mats: Array = [] # три общих материала пятен: не создаём новые на каждый взрыв
+
+static func _scorch_mat(k: int) -> StandardMaterial3D:
+	if _scorch_mats.is_empty():
+		for j in 3:
+			var m := StandardMaterial3D.new()
+			var v := 0.03 + 0.03 * float(j)
+			m.albedo_color = Color(v, v * 0.9, v * 0.85)
+			m.roughness = 1.0
+			_scorch_mats.append(m)
+	return _scorch_mats[k]
+
 # Выжженное пятно на земле: тёмные плоские диски чуть выше пола (разная высота — без мерцания).
 static func make_scorch(parent: Node3D, center: Vector3, seed_v: int) -> Node3D:
 	var n := Node3D.new()
@@ -88,13 +100,9 @@ static func make_scorch(parent: Node3D, center: Vector3, seed_v: int) -> Node3D:
 		var c := CylinderMesh.new()
 		c.top_radius = d.z; c.bottom_radius = d.z; c.height = 0.01
 		c.radial_segments = 14; c.rings = 1
-		var m := StandardMaterial3D.new()
-		var v := 0.03 + 0.03 * float(i % 3)
-		m.albedo_color = Color(v, v * 0.9, v * 0.85)
-		m.roughness = 1.0
 		var mi := MeshInstance3D.new()
 		mi.mesh = c
-		mi.material_override = m
+		mi.material_override = _scorch_mat(i % 3)
 		mi.position = Vector3(d.x, 0.02 + 0.004 * i, d.y)
 		n.add_child(mi)
 	parent.add_child(n)
