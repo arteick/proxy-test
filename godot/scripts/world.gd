@@ -21,7 +21,7 @@ var moving := false
 var cam: Camera3D
 var light := Lighting.new()
 var hero := Hero.new()
-var pitch := 0.45
+var pitch := Move.TOP_PITCH
 var zoom := 1.0
 var t := 0.0
 var game: Game
@@ -37,7 +37,7 @@ func _ready() -> void:
 
 	cam = Camera3D.new()
 	cam.far = FAR
-	cam.fov = 50.0
+	cam.fov = 40.0
 	add_child(cam)
 	_build_ascii_pass()
 	hud = Hud.make_label()
@@ -73,14 +73,7 @@ func _build_ascii_pass() -> void:
 	cam.add_child(mi)
 
 func _input(e: InputEvent) -> void:
-	# клик захватывает мышь (Esc отпускает) — дальше движение мышки крутит камеру
-	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	if e is InputEventKey and e.pressed and e.physical_keycode == KEY_ESCAPE:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	if e is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		var v := Move.look(yaw, pitch, e.relative, MOUSE_SENS)
-		yaw = v.x; pitch = v.y
+	# вид сверху: наклон фиксирован, мышь камеру не крутит; колесо — масштаб
 	if e is InputEventMouseButton and e.pressed:
 		if e.button_index == MOUSE_BUTTON_WHEEL_DOWN: zoom = minf(2.2, zoom * 1.06)
 		if e.button_index == MOUSE_BUTTON_WHEEL_UP: zoom = maxf(0.5, zoom * 0.94)
@@ -122,8 +115,7 @@ func _process(dt: float) -> void:
 	hero.animate(dt, moving, t)
 	var base := hero.position
 	var m := get_viewport().get_mouse_position() / Vector2(get_viewport().get_visible_rect().size)
-	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED: m = Vector2(0.5, 0.4)
 	light.follow(base, m, t, dt)
-	cam.position = base + Vector3(0, 1.5, 0) + Vector3(0, 0, 5.0 * zoom).rotated(Vector3.RIGHT, -pitch).rotated(Vector3.UP, yaw)
-	cam.look_at(base + Vector3(0, 1.5, 0))
+	cam.position = Move.top_down_cam(base, yaw, zoom)
+	cam.look_at(base)
 	_update_game(dt)

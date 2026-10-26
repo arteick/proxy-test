@@ -11,8 +11,8 @@ static func text(game: Game, hero: Vector3) -> String:
 	var best := INF
 	for c in game.crystals:
 		best = minf(best, c.distance_to(Vector2(hero.x, hero.z)))
-	line += "\nБлижайший кристалл: %d м (вперёд, по -Z)" % int(best)
-	return line + "\nWASD — ход, мышь (после клика) или Q/E — камера, Esc — отпустить"
+	line += "\nБлижайший кристалл: %d м" % int(best)
+	return line + "\nWASD — ход, Q/E — поворот, колесо — масштаб"
 
 static func make_label() -> Label:
 	var l := Label.new()

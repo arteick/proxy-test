@@ -28,6 +28,8 @@ func _init() -> void:
 	var p := Move.step(Vector3(0, 0, 3), Vector3(0, 0, -1), 2.0, 1.0, 0.5, wall)
 	check(p.z >= 1.5 - 0.001, "коллизия: не заходит в колонну")
 	check(Move.step(Vector3(5, 0, 5), Vector3(1, 0, 0), 2.0, 0.5, 0.5, wall).x == 6.0, "движение без препятствий")
+	var tc := Move.top_down_cam(Vector3.ZERO, 0.0, 1.0)
+	check(tc.y > 12.0 and tc.z > 0.0 and tc.z < 3.0, "камера: вид сверху, почти над героем")
 	var lk := Move.look(0.0, 0.5, Vector2(100, 0), 0.01)
 	check(is_equal_approx(lk.x, -1.0) and is_equal_approx(lk.y, 0.5), "камера: мышь вправо поворачивает yaw")
 	check(is_equal_approx(Move.look(0.0, 0.5, Vector2(0, 1000), 0.01).y, Move.PITCH_MAX) and is_equal_approx(Move.look(0.0, 0.5, Vector2(0, -1000), 0.01).y, Move.PITCH_MIN), "камера: наклон ограничен")
