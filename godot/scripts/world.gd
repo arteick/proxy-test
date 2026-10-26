@@ -8,6 +8,7 @@ const Level = preload("res://scripts/level.gd")
 const Actors = preload("res://scripts/actors.gd")
 const Lighting = preload("res://scripts/lighting.gd")
 const Fireball = preload("res://scripts/fireball.gd")
+const Explosion = preload("res://scripts/explosion.gd")
 # Сцена целиком в коде: колонны, персонаж, свет, камера и ASCII-постобработка.
 
 const FAR := 60.0
@@ -34,6 +35,9 @@ var run_seed := 1
 var ball: Fireball # шар, который копится над головой
 var ball_node: Node3D
 var flying: Array = [] # [Fireball, Node3D]
+var explosions: Array = [] # [Explosion, Node3D]
+var scorches: Array = []
+var boom_seed := 1
 var ball_blocked := false # после отмены ждём отпускания ЛКМ
 
 func _ready() -> void:
@@ -124,8 +128,10 @@ func _update_fireball(dt: float, lmb: bool, rmb: bool) -> void:
 		if ball.state == "fading":
 			ball_blocked = true
 		if ball.state == "flying":
-			ball.dir = Vector3(0, 0, -1).rotated(Vector3.UP, hero.rotation.y)
-			ball.pos = hero.position + Vector3(0, 3.7 * ms, 0) + ball.dir * 0.8
+			var from := hero.position + Vector3(0, 3.7 * ms, 0)
+			var target := Fireball.aim_target(hero.position, _cursor_ground(hero.position))
+			var fwd := (target - hero.position) * Vector3(1, 0, 1)
+			ball.launch(from + fwd.normalized() * 0.8, target)
 			flying.append([ball, ball_node])
 			ball = null
 		elif ball.state == "gone":
@@ -135,11 +141,39 @@ func _update_fireball(dt: float, lmb: bool, rmb: bool) -> void:
 			Fireball.apply(ball_node, ball, ms, t)
 	for f in flying.duplicate():
 		f[0].update(dt, false, false)
-		if f[0].state == "gone":
+		if f[0].state == "exploded":
+			_explode(f[0].pos)
+			f[1].queue_free()
+			flying.erase(f)
+		elif f[0].state == "gone":
 			f[1].queue_free()
 			flying.erase(f)
 		else:
 			Fireball.apply(f[1], f[0], ms, t)
+
+# Точка земли (y=0) под курсором; если луч не доходит до земли — прямо перед героем.
+func _cursor_ground(fallback: Vector3) -> Vector3:
+	var mp := get_viewport().get_mouse_position()
+	var hit = Plane(Vector3.UP, 0.0).intersects_ray(cam.project_ray_origin(mp), cam.project_ray_normal(mp))
+	return hit if hit != null else fallback
+
+func _explode(at: Vector3) -> void:
+	boom_seed += 1
+	var ex := Explosion.make(at, boom_seed)
+	explosions.append([ex, Explosion.make_node(self, ex)])
+	scorches.append(Explosion.make_scorch(self, at, boom_seed))
+	if scorches.size() > Explosion.SCORCH_MAX:
+		scorches.pop_front().queue_free()
+
+func _update_explosions(dt: float) -> void:
+	var ms := Move.marker_scale(zoom)
+	for e in explosions.duplicate():
+		e[0].update(dt)
+		if e[0].done():
+			e[1].queue_free()
+			explosions.erase(e)
+		else:
+			Explosion.apply(e[1], e[0], ms)
 
 func _process(dt: float) -> void:
 	t += dt
@@ -150,11 +184,15 @@ func _process(dt: float) -> void:
 	var lmb := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 	var rmb := Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)
 	_update_fireball(dt, lmb, rmb)
+	_update_explosions(dt)
 	var dir := Move.wish_dir(wasd, yaw) if game.state == "play" else Vector3.ZERO
 	moving = dir != Vector3.ZERO
 	if moving:
 		hero.position = Move.step(hero.position, dir, SPEED * Fireball.speed_mult(ball), dt, HERO_R, colliders)
 		hero.rotation.y = lerp_angle(hero.rotation.y, atan2(-dir.x, -dir.z), minf(1.0, dt * 12.0))
+	if ball != null and ball.state == "charging":
+		var aim := Fireball.aim_target(hero.position, _cursor_ground(hero.position)) - hero.position
+		hero.rotation.y = lerp_angle(hero.rotation.y, atan2(-aim.x, -aim.z), minf(1.0, dt * 12.0)) # лицом к курсору
 	hero.casting = ball != null and ball.state == "charging"
 	hero.animate(dt, moving, t)
 	var base := hero.position

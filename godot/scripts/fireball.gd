@@ -1,19 +1,24 @@
 extends RefCounted
 # Огненный шар мага: логика состояний без сцены (тестируется headless) и маленькая модель-вид.
-# ЛКМ удержание — раскрутка посоха и рост шара; отпустить — шар летит вперёд; ПКМ при удержании ЛКМ — отмена, шар гаснет.
+# ЛКМ удержание — раскрутка посоха и рост шара; отпустить — шар летит к курсору (но не дальше MAX_RANGE) и взрывается в точке падения;
+# ПКМ при удержании ЛКМ — отмена, шар гаснет.
 
 const CHARGE_TIME := 2.0 # секунд до полного шара
 const MIN_CHARGE := 0.15 # меньший шар при отпускании просто гаснет
 const FADE_TIME := 1.5
 const FLY_SPEED := 6.0 # шар летит медленно
-const FLY_LIFE := 3.0
+const MAX_RANGE := 14.0 # дальность полёта по земле; курсор дальше — шар падает на границе
+const LAND_Y := 0.3 # высота центра шара в точке падения
 const SLOW := 0.4 # множитель скорости героя при раскрутке
 const MAX_RADIUS := 0.7
 
-var state := "charging" # charging | flying | fading | gone
+var state := "charging" # charging | flying | exploded | fading | gone
 var charge := 0.0
 var fade := 1.0
-var life := FLY_LIFE
+var start := Vector3.ZERO
+var end := Vector3.ZERO
+var dist := 1.0
+var travelled := 0.0
 var pos := Vector3.ZERO
 var dir := Vector3.ZERO
 
@@ -35,14 +40,32 @@ func update(dt: float, lmb: bool, rmb: bool) -> void:
 			else:
 				charge = minf(1.0, charge + dt / CHARGE_TIME)
 		"flying":
-			pos += dir * FLY_SPEED * dt
-			life -= dt
-			if life <= 0.0:
-				state = "gone"
+			travelled += FLY_SPEED * dt
+			if travelled >= dist:
+				pos = end
+				state = "exploded"
+			else:
+				pos = start + dir * travelled
 		"fading":
 			fade -= dt / FADE_TIME
 			if fade <= 0.0:
 				state = "gone"
+
+# Точка падения: на земле в сторону pt (точка под курсором), не дальше MAX_RANGE от героя; курсор над героем — вперёд (-Z).
+static func aim_target(origin: Vector3, pt: Vector3) -> Vector3:
+	var d := Vector3(pt.x - origin.x, 0.0, pt.z - origin.z)
+	if d.length() < 0.001:
+		d = Vector3(0, 0, -1)
+	return Vector3(origin.x, 0.0, origin.z) + d.normalized() * minf(d.length(), MAX_RANGE)
+
+# Запуск из точки from в точку падения target (земля): шар по прямой снижается до LAND_Y.
+func launch(from: Vector3, target: Vector3) -> void:
+	start = from
+	pos = from
+	end = Vector3(target.x, LAND_Y, target.z)
+	dist = maxf(from.distance_to(end), 0.001)
+	dir = (end - from) / dist
+	travelled = 0.0
 
 static func make_node(parent: Node3D) -> Node3D:
 	var n := Node3D.new()
