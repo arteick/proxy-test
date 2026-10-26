@@ -17,7 +17,8 @@ jobs:
         run: godot --headless --path godot -s tests/run.gd
       - name: Экспорт в Web
         run: |
-          mkdir -p build/web
+          mkdir -p build/web ~/.local/share/godot/export_templates
+          cp -r /root/.local/share/godot/export_templates/4.3.stable ~/.local/share/godot/export_templates/
           godot --headless --path godot --import || true
           godot --headless --path godot --export-release Web ../build/web/index.html
       - uses: actions/upload-artifact@v4
