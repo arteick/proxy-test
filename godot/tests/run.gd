@@ -72,6 +72,8 @@ func _init() -> void:
 	gh.state = "lose"; gh.hp = 0
 	check(Hud.text(gh, Vector3.ZERO).contains("Тени взяли") and Hud.text(gh, Vector3.ZERO).contains("···"), "HUD: поражение, жизни не уходят в минус")
 	var root := Node3D.new()
+	var fi := Level.floor_image()
+	check(fi.get_width() == Level.TILE * 8 and fi.get_pixel(5, 5) != fi.get_pixel(40, 40), "пол: текстура с вариацией")
 	check(Level.build(root).size() == Level.COLUMNS and root.get_child_count() == Level.COLUMNS + 1, "уровень: колонны и коллайдеры")
 	check(Actors.spawn_crystals(root, Game.new(2).crystals).size() == Game.CRYSTALS and Actors.spawn_enemies(root, Game.new(2).enemies).size() == Game.ENEMIES, "узлы: кристаллы и тени")
 	root.free()
