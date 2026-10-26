@@ -9,6 +9,7 @@ const Lighting = preload("res://scripts/lighting.gd")
 const Spells = preload("res://scripts/spells.gd")
 const Postfx = preload("res://scripts/postfx.gd")
 const Dash = preload("res://scripts/dash.gd")
+const Campfire = preload("res://scripts/campfire.gd")
 # Сцена целиком в коде: колонны, персонаж, свет, камера и ASCII-постобработка.
 
 const FAR := 60.0
@@ -34,6 +35,8 @@ var last_hud := ""
 var run_seed := 1
 var spells := Spells.new()
 var dash := Dash.new()
+var fire := Campfire.new()
+var fire_node: Node3D
 
 func _ready() -> void:
 	colliders = Level.build(self) + Level.build_ruins(self)
@@ -47,6 +50,7 @@ func _ready() -> void:
 	add_child(cam)
 	ascii_mat = Postfx.build(self, cam)
 	ascii_mat.set_shader_parameter("far_blend", Move.far_blend(zoom))
+	fire_node = Campfire.make_node(self)
 	add_child(spells)
 	spells.setup(hero, cam)
 	spells.exploded.connect(_on_explosion)
@@ -116,6 +120,8 @@ func _process(dt: float) -> void:
 		float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 		float(Input.is_physical_key_pressed(KEY_W)) - float(Input.is_physical_key_pressed(KEY_S)))
 	spells.update(dt, t, zoom, game.state == "play")
+	fire.update(dt)
+	Campfire.apply(fire_node, fire, t, marker)
 	var dir := Move.wish_dir(wasd, yaw) if game.state == "play" else Vector3.ZERO
 	moving = dir != Vector3.ZERO
 	dash.update(dt)

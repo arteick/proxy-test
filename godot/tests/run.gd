@@ -10,6 +10,7 @@ const Fireball = preload("res://scripts/fireball.gd")
 const Dash = preload("res://scripts/dash.gd")
 const Trail = preload("res://scripts/trail.gd")
 const Explosion = preload("res://scripts/explosion.gd")
+const Campfire = preload("res://scripts/campfire.gd")
 # Запуск: godot --headless --path godot -s tests/run.gd
 
 var fails := 0
@@ -187,5 +188,20 @@ func _init() -> void:
 	gd.update(Vector3.ZERO, 0.1)
 	check(gd.hp == Game.HP_MAX - 1, "после рывка урон проходит")
 	check(Hud.text(gd, Vector3.ZERO, 1.0).contains("█████") and Hud.text(gd, Vector3.ZERO, 0.0).contains("░░░░░"), "HUD: полоска рывка")
+	var fl0 := Campfire.cells(0.0)
+	var fl1 := Campfire.cells(0.7)
+	check(fl0.size() == Campfire.cell_count(), "костёр: число ячеек пламени")
+	check(fl0[0].pos.x != fl1[0].pos.x and fl0[fl0.size() - 1].pos.x != fl1[fl1.size() - 1].pos.x, "костёр: пламя извивается")
+	check(fl0[fl0.size() - 1].pos.y > fl0[0].pos.y, "костёр: верх пламени выше низа")
+	var cf := Campfire.new()
+	var seen := 0
+	var rose := true
+	for k in 400:
+		cf.update(0.016)
+		if not cf.smoke.is_empty():
+			seen += 1
+			rose = rose and cf.smoke_pos().y <= Campfire.SMOKE_BASE_Y + Campfire.SMOKE_RISE + 0.001
+	check(seen > 0 and seen < 400 and rose, "костёр: дым по одной частице, не выше одного символа")
+	check(Campfire.new().smoke_pos() == null and Campfire.new().smoke_alpha() == 0.0, "костёр: сначала дыма нет")
 	root.free()
 	quit(1 if fails else 0)
