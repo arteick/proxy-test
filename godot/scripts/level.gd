@@ -17,11 +17,11 @@ static func floor_image() -> Image:
 			var edge := x % TILE == 0 or y % TILE == 0
 			var c: Color
 			if (tx + ty) % 3 == 0:
-				var v := 0.40 + (th % 40) / 255.0 + (0.0 if edge else (h % 20) / 255.0)
+				var v := 0.34 + (th % 24) / 255.0 + (0.0 if edge else (h % 8) / 255.0)
 				c = Color(v, v, v * 1.05)
-				if edge: c = c.darkened(0.35)
+				if edge: c = c.darkened(0.2)
 			else:
-				var g := 0.30 + (h % 90) / 255.0
+				var g := 0.24 + (h % 30) / 255.0
 				c = Color(g * 0.55, g, g * 0.45)
 			img.set_pixel(x, y, c)
 	img.generate_mipmaps()  # без мип-уровней мелкий шум пола рябит при движении

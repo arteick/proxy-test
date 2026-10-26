@@ -36,7 +36,7 @@ void fragment() {
 	lum = pow(clamp(lum * 1.2, 0.0, 1.0), 0.8);
 	// разнообразие: соседние по яркости символы выбираются по хэшу ячейки, поэтому ровные поверхности не залиты одним знаком
 	float hsh = fract(sin(dot(cell_id, vec2(12.9898, 78.233))) * 43758.5453);
-	float jit = (hsh - 0.5) * 3.0 * (1.0 - far_blend) * step(0.04, lum);
+	float jit = (hsh - 0.5) * 1.0 * (1.0 - far_blend) * step(0.04, lum);
 	float idx = clamp(floor(lum * (n_glyphs - 1.0) + 0.5 + jit), 0.0, n_glyphs - 1.0);
 	float cov = texture(atlas, vec2((idx + local.x) / n_glyphs, local.y)).r;
 
@@ -50,7 +50,7 @@ void fragment() {
 	float solid = mix(0.05, 0.55, lum);
 	float val = mix(cov, solid, far_blend);
 	vec3 tint = mix(vec3(1.0), col / max(lum, 0.04), 0.85);
-	vec3 outc = tint * val * (0.45 + 1.3 * lum) + col * 0.12;
+	vec3 outc = tint * val * (0.45 + 1.3 * lum) + col * 0.22; // подложка из цвета сцены смягчает контраст символов
 	// дальний вид считаем только когда он виден (иначе ~20 лишних выборок текстур на ячейку)
 	if (far_blend > 0.0) {
 		// усреднение по ячейке и по соседям: шум пола сглаживается, а значки выделяются локальным контрастом

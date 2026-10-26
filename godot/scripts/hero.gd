@@ -50,6 +50,10 @@ func _build() -> void:
 	var skin := _mat(Color("e8c9a0"), 0.7)
 	var robe := _mat(Color("2a4fc4"), 0.7)
 	var robe_dark := _mat(Color("1b2f7a"), 0.75)
+	for m in [robe, robe_dark]: # лёгкое свечение: маг ярче пола и отделяется от окружения
+		m.emission_enabled = true
+		m.emission = m.albedo_color
+		m.emission_energy_multiplier = 0.6
 	var wood := _mat(Color("6b4423"), 0.85)
 	var wood_dark := _mat(Color("4a2e15"), 0.9)
 	var wood_light := _mat(Color("8f6236"), 0.8)
