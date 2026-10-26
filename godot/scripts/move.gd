@@ -27,8 +27,8 @@ const PITCH_MAX := 1.2
 static func look(yaw: float, pitch: float, rel: Vector2, sens: float) -> Vector2:
 	return Vector2(yaw - rel.x * sens, clampf(pitch + rel.y * sens, PITCH_MIN, PITCH_MAX))
 
-# Вид сверху, как в пиксельных играх: камера почти над героем (наклон ~80°), W — вверх экрана.
-const TOP_PITCH := 1.4
-const TOP_DIST := 13.0
+# Вид сверху, как в пиксельных играх: камера сверху-сзади под наклоном ~52° (видно героя, не только макушку), W — вверх экрана.
+const TOP_PITCH := 0.9
+const TOP_DIST := 14.0
 static func top_down_cam(base: Vector3, yaw: float, zoom: float) -> Vector3:
 	return base + Vector3(0, 0, TOP_DIST * zoom).rotated(Vector3.RIGHT, -TOP_PITCH).rotated(Vector3.UP, yaw)
