@@ -177,7 +177,7 @@ func _input(e: InputEvent) -> void:
 		if e.button_index == MOUSE_BUTTON_WHEEL_UP: zoom = maxf(0.5, zoom * 0.94)
 
 func _unhandled_key_input(e: InputEvent) -> void:
-	if e is InputEventKey and e.pressed and e.keycode == KEY_R:
+	if e is InputEventKey and e.pressed and e.physical_keycode == KEY_R:
 		_new_game()
 
 func _update_game(dt: float) -> void:
@@ -208,15 +208,15 @@ func _update_game(dt: float) -> void:
 		for c in game.crystals:
 			best = minf(best, c.distance_to(Vector2(hero.position.x, hero.position.z)))
 		line += "\nБлижайший кристалл: %d м (вперёд, по -Z)" % int(best)
-		line += "\nWASD — ход, Q/E — поворот камеры, колесо — масштаб"
+		line += "\nWASD (любая раскладка) — ход, Q/E — поворот камеры, колесо — масштаб"
 	hud.text = line
 
 func _process(dt: float) -> void:
 	t += dt
-	yaw += (float(Input.is_key_pressed(KEY_Q)) - float(Input.is_key_pressed(KEY_E))) * 1.8 * dt
+	yaw += (float(Input.is_physical_key_pressed(KEY_Q)) - float(Input.is_physical_key_pressed(KEY_E))) * 1.8 * dt
 	var wasd := Vector2(
-		float(Input.is_key_pressed(KEY_D)) - float(Input.is_key_pressed(KEY_A)),
-		float(Input.is_key_pressed(KEY_W)) - float(Input.is_key_pressed(KEY_S)))
+		float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
+		float(Input.is_physical_key_pressed(KEY_W)) - float(Input.is_physical_key_pressed(KEY_S)))
 	var dir := Move.wish_dir(wasd, yaw) if game.state == "play" else Vector3.ZERO
 	moving = dir != Vector3.ZERO
 	if moving:

@@ -9,3 +9,4 @@
 - 2026-10-26: удалён старый Three.js-прототип и всё связанное (src/, npm test, pages.yml, /old/ в godot.yml). Godot-код не зависел от него.
 
 - 2026-10-26 (запрос 9ayg): свет в world.gd: ProceduralSky для ambient (небо 7080b8/земля 2a2018, 0.9), omni_attenuation 1.4, filmic tonemap. Тесты 20/20 зелёные, скриншот xvfb: колонны читаются градацией.
+- 2026-10-26 (запрос xihn): «не работает управление» — вероятная причина: Input.is_key_pressed зависит от раскладки (с русской WASD/Q/E/R не срабатывают). Заменено на is_physical_key_pressed / physical_keycode в world.gd. Тесты логики зелёные; в реальном браузере не проверено.
