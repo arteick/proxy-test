@@ -136,23 +136,51 @@ func _new_game() -> void:
 		enemy_nodes.append(mi)
 
 func _build_hero() -> void:
+	# маг: синяя мантия, остроконечная шляпа, посох в коричневых тонах
 	add_child(hero)
 	var skin := _mat(Color("e8c9a0"), 0.7)
-	var cloth := _mat(Color("3d7bd9"), 0.6)
-	var dark := _mat(Color("35394a"), 0.7)
-	var body := CapsuleMesh.new(); body.radius = 0.38; body.height = 1.46
-	_mesh(body, cloth, Vector3(0, 1.35, 0), hero)
-	var head := SphereMesh.new(); head.radius = 0.32; head.height = 0.64
+	var robe := _mat(Color("2a4fc4"), 0.7)
+	var robe_dark := _mat(Color("1b2f7a"), 0.75)
+	var wood := _mat(Color("6b4423"), 0.85)
+	var wood_dark := _mat(Color("4a2e15"), 0.9)
+	var wood_light := _mat(Color("8f6236"), 0.8)
+	var skirt := CylinderMesh.new(); skirt.top_radius = 0.3; skirt.bottom_radius = 0.62; skirt.height = 1.5
+	_mesh(skirt, robe, Vector3(0, 0.8, 0), hero)
+	var torso := CapsuleMesh.new(); torso.radius = 0.34; torso.height = 0.9
+	_mesh(torso, robe, Vector3(0, 1.6, 0), hero)
+	var belt := CylinderMesh.new(); belt.top_radius = 0.36; belt.bottom_radius = 0.36; belt.height = 0.1
+	_mesh(belt, wood_dark, Vector3(0, 1.3, 0), hero)
+	var head := SphereMesh.new(); head.radius = 0.3; head.height = 0.6
 	_mesh(head, skin, Vector3(0, 2.15, 0), hero)
-	var hat := CylinderMesh.new(); hat.top_radius = 0.0; hat.bottom_radius = 0.36; hat.height = 0.5
-	_mesh(hat, dark, Vector3(0, 2.6, 0), hero)
-	for l in [[arm_l, skin, -0.5, 1.75], [arm_r, skin, 0.5, 1.75],
-			[leg_l, dark, -0.2, 0.9], [leg_r, dark, 0.2, 0.9]]:
+	var brim := CylinderMesh.new(); brim.top_radius = 0.5; brim.bottom_radius = 0.5; brim.height = 0.06
+	_mesh(brim, robe_dark, Vector3(0, 2.38, 0), hero)
+	var hat := CylinderMesh.new(); hat.top_radius = 0.0; hat.bottom_radius = 0.34; hat.height = 0.75
+	_mesh(hat, robe, Vector3(0, 2.78, 0), hero)
+	var feet := _mat(Color("2b1d12"), 0.9)
+	for l in [[arm_l, robe, -0.45, 1.8], [arm_r, robe, 0.45, 1.8]]:
 		var pivot: Node3D = l[0]
 		pivot.position = Vector3(l[2], l[3], 0)
 		hero.add_child(pivot)
-		var cap := CapsuleMesh.new(); cap.radius = 0.11; cap.height = 0.82
+		var cap := CapsuleMesh.new(); cap.radius = 0.12; cap.height = 0.82
 		_mesh(cap, l[1], Vector3(0, -0.4, 0), pivot)
+		var hand := SphereMesh.new(); hand.radius = 0.1; hand.height = 0.2
+		_mesh(hand, skin, Vector3(0, -0.85, 0), pivot)
+	for l in [[leg_l, -0.2], [leg_r, 0.2]]:
+		var pivot: Node3D = l[0]
+		pivot.position = Vector3(l[1], 0.3, 0)
+		hero.add_child(pivot)
+		var boot := CapsuleMesh.new(); boot.radius = 0.12; boot.height = 0.5
+		_mesh(boot, feet, Vector3(0, -0.1, 0), pivot)
+	# посох в правой руке: древко, утолщения и навершие
+	var shaft := CylinderMesh.new(); shaft.top_radius = 0.04; shaft.bottom_radius = 0.05; shaft.height = 2.6
+	_mesh(shaft, wood, Vector3(0, -0.1, -0.05), arm_r)
+	var knob := CylinderMesh.new(); knob.top_radius = 0.07; knob.bottom_radius = 0.07; knob.height = 0.12
+	_mesh(knob, wood_dark, Vector3(0, 0.55, -0.05), arm_r)
+	_mesh(knob, wood_dark, Vector3(0, -0.8, -0.05), arm_r)
+	var head_s := SphereMesh.new(); head_s.radius = 0.13; head_s.height = 0.26
+	_mesh(head_s, wood_light, Vector3(0, 1.28, -0.05), arm_r)
+	var claw := TorusMesh.new(); claw.inner_radius = 0.1; claw.outer_radius = 0.17
+	_mesh(claw, wood_dark, Vector3(0, 1.45, -0.05), arm_r)
 
 func _build_ascii_pass() -> void:
 	var atlas_vp: SubViewport = SubViewport.new()
