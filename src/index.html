@@ -24,6 +24,7 @@
   .line { display: flex; min-height: 20px; }
   .num { width: 48px; flex: none; text-align: right; padding-right: 12px; color: #858585; user-select: none; }
   .text { white-space: pre; flex: 1; color: #d4d4d4; }
+  .sel { background: #264f78; }
   .line.has-cursor { background: #262626; }
   .cur { display: inline-block; width: 0; height: 18px; border-left: 2px solid #aeafad; vertical-align: text-bottom; margin-left: -1px; margin-right: -1px; animation: blink 1s steps(2) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
@@ -38,7 +39,7 @@
 </aside>
 <section id="main">
   <div id="tab">Файл не выбран</div>
-  <div id="hint">Alt+клик или Ctrl+Alt+↑/↓ — добавить курсор; Esc — оставить один. Печать, Enter, Backspace, Delete, стрелки работают на всех курсорах.</div>
+  <div id="hint">Мультикурсор: Alt+клик, Ctrl+Alt+↑/↓, Ctrl+D; Esc — один курсор. Выделение: Shift+стрелки, Ctrl+A, Ctrl+L, двойной клик. Правка: Ctrl+Z/Y, Ctrl+C/X/V, Ctrl+/, Tab/Shift+Tab, Alt+↑/↓, Shift+Alt+↑/↓, Ctrl+Shift+K, Ctrl+Enter, Ctrl+Backspace/Delete. Навигация: Home/End, Ctrl+←/→, Ctrl+Home/End, PgUp/PgDn.</div>
   <div id="editor"><div id="empty">Создайте или выберите файл слева.</div></div>
   <textarea id="input" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>
 </section>

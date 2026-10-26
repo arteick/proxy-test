@@ -3,3 +3,4 @@
 - 2026-10-26: добавлен workflow Pages (тесты → публикация src/). npm test зелёный; сам деплой не проверен — нужен Source = GitHub Actions в настройках Pages.
 - 2026-10-26: проверен деплой Pages через gh api: запуск 6 (push, main) success, deploy-pages success. Открыть сайт из песочницы нельзя (прокси 403), доступность не проверена.
 - 2026-10-26: добавлен src/sw.js (самоудаление старого service worker) и отписка в index.html; npm test зелёный. Деплой запуск 6 успешен, src на main новый.
+- 2026-10-26: горячие клавиши и выделение. Ядро: выделения (anchors), слова, Home/End, строки (сдвиг, дубль, удаление), комментарий, отступы, Ctrl+D. npm test: 23 зелёных (12 новых). Playwright: Ctrl+/, Ctrl+Z, Alt+↓, Ctrl+Shift+K, Ctrl+Backspace работают; буфер обмена в headless недоступен (не проверен).
