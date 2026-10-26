@@ -156,6 +156,7 @@ func _build_hero() -> void:
 	_mesh(brim, robe_dark, Vector3(0, 2.38, 0), hero)
 	var hat := CylinderMesh.new(); hat.top_radius = 0.0; hat.bottom_radius = 0.34; hat.height = 0.75
 	_mesh(hat, robe, Vector3(0, 2.78, 0), hero)
+	_build_robe_texture(robe, robe_dark)
 	var feet := _mat(Color("2b1d12"), 0.9)
 	for l in [[arm_l, robe, -0.45, 1.8], [arm_r, robe, 0.45, 1.8]]:
 		var pivot: Node3D = l[0]
@@ -181,6 +182,34 @@ func _build_hero() -> void:
 	_mesh(head_s, wood_light, Vector3(0, 1.28, -0.05), arm_r)
 	var claw := TorusMesh.new(); claw.inner_radius = 0.1; claw.outer_radius = 0.17
 	_mesh(claw, wood_dark, Vector3(0, 1.45, -0.05), arm_r)
+
+func _build_robe_texture(robe: Material, robe_dark: Material) -> void:
+	# «фактура» мантии объёмом: складки и подол вокруг корпуса, плащ сзади, воротник, широкие рукава.
+	# После ASCII-шейдера разная яркость/наклон граней даёт разные символы, а не один цвет.
+	var trim := _mat(Color("d8b44a"), 0.5)
+	for i in 12:
+		var a := TAU * i / 12.0
+		var fold := BoxMesh.new(); fold.size = Vector3(0.1, 1.45, 0.2)
+		var f := _mesh(fold, robe_dark if i % 2 else robe, Vector3(sin(a) * 0.5, 0.78, cos(a) * 0.5), hero)
+		f.basis = Basis(Vector3.UP, a) * Basis(Vector3.RIGHT, -0.2)
+		var tooth := PrismMesh.new(); tooth.size = Vector3(0.3, 0.22, 0.1)
+		var h := _mesh(tooth, trim if i % 3 == 0 else robe_dark, Vector3(sin(a) * 0.66, 0.1, cos(a) * 0.66), hero)
+		h.basis = Basis(Vector3.UP, a) * Basis(Vector3.RIGHT, PI)
+	var hem := TorusMesh.new(); hem.inner_radius = 0.58; hem.outer_radius = 0.68
+	_mesh(hem, trim, Vector3(0, 0.12, 0), hero)
+	# плащ: три слоя пластин за спиной (персонаж смотрит в -Z, спина в +Z)
+	for j in 3:
+		var cape := BoxMesh.new(); cape.size = Vector3(0.85 - j * 0.12, 1.5 - j * 0.15, 0.06)
+		var c := _mesh(cape, robe_dark if j % 2 == 0 else robe, Vector3(0, 1.15 - j * 0.04, 0.4 + j * 0.07), hero)
+		c.rotation.x = 0.12 + j * 0.06
+	var collar := TorusMesh.new(); collar.inner_radius = 0.26; collar.outer_radius = 0.42
+	_mesh(collar, trim, Vector3(0, 1.88, 0), hero)
+	var sash := BoxMesh.new(); sash.size = Vector3(0.14, 1.0, 0.04)
+	var sh := _mesh(sash, trim, Vector3(0, 0.95, -0.52), hero)
+	sh.rotation.x = -0.22
+	for side in [-0.45, 0.45]:
+		var sleeve := CylinderMesh.new(); sleeve.top_radius = 0.14; sleeve.bottom_radius = 0.3; sleeve.height = 0.6
+		_mesh(sleeve, robe_dark, Vector3(side, 1.5, 0), hero).rotation.z = signf(side) * 0.15
 
 func _build_ascii_pass() -> void:
 	var atlas_vp: SubViewport = SubViewport.new()
