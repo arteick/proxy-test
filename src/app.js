@@ -166,7 +166,7 @@ document.addEventListener('mousemove', (e) => {
 document.addEventListener('mouseup', () => { dragging = false; });
 
 function copyToClipboard(text) {
-  try { navigator.clipboard?.writeText(text); } catch {}
+  navigator.clipboard?.writeText(text).catch(() => {});
 }
 
 function undo() {
