@@ -1,5 +1,5 @@
 # MEMORY — что нужно знать новой сессии
-Обновлено: 2026-10-26 UTC, запрос 20261026-015734-5kfo
+Обновлено: 2026-10-26 UTC, запрос 20261026-020615-kea3
 
 ## Цель
 Пустая база под новый проект + тестовый репозиторий моста claude-proxy (Telegram → Worker → routine). Сейчас: прототип ASCII-игры с настоящим освещением.
@@ -9,15 +9,16 @@
 - 2026-10-26: игра в ASCII-стиле (не как Cataclysm): сцена рендерится, шейдер превращает в символы, настоящий свет, вдали символы сглаживаются. Варианты: 1 веб Three.js, 2 Godot, 3 обсуждение. Идём по очереди 1→2→3.
 - 2026-10-26: публикация на GitHub Pages: .github/workflows/pages.yml деплоит src/ с main.
 
+- 2026-10-26: владелец решил переделать всё на Godot (стек в DECISIONS.md).
+
 ## Состояние
-Вариант 1 готов: src/index.html, main.js (сцена, персонаж, шейдер), ascii.js (рамп и затухание, тесты в tests/), vendor/three.module.js (Three r170 локально: CDN из песочницы недоступен). Ссылка: https://arteick.github.io/proxy-test/ (если деплой прошёл).
+Каркас Godot 4.3 в godot/ (GDScript, GL Compatibility, шейдер ASCII, тесты tests/run.gd, CI .github/workflows/godot.yml) — не запускался, проверит CI. Вариант 1 (Three.js) пока остаётся: src/index.html, main.js (сцена, персонаж, шейдер), ascii.js (рамп и затухание, тесты в tests/), vendor/three.module.js (Three r170 локально: CDN из песочницы недоступен). Ссылка: https://arteick.github.io/proxy-test/ (если деплой прошёл).
 
 ## Следующие шаги
-Правки стиля по отзыву владельца; затем Godot (docs/ROADMAP.md).
+Запустить godot.yml, починить по логу; затем игровая часть (docs/ROADMAP.md).
 
 ## Открытые вопросы
-Three.js или Godot: рекомендация — Three.js для прототипа, см. DECISIONS.md.
 Нравится ли стиль; какой проект делать на этой основе.
 
 ## Где что лежит
-src/ — код сцены, tests/ — тесты, docs/chat/ — история, docs/PROGRESS.md — сделанное.
+godot/ — новый проект, src/ — старый веб-прототип, tests/ — тесты, docs/chat/ — история, docs/PROGRESS.md — сделанное.
