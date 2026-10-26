@@ -3,7 +3,7 @@ const Game = preload("res://scripts/game.gd")
 
 static func text(game: Game, hero: Vector3) -> String:
 	var hp := maxi(game.hp, 0)
-	var line := "Кристаллы %d/%d   Жизни %s   %d с" % [game.score, Game.CRYSTALS, "♥".repeat(hp) + "·".repeat(Game.HP_MAX - hp), int(game.time)]
+	var line := "Кристаллы %d/%d   Жизни %s   Убито %d   %d с" % [game.score, Game.CRYSTALS, "♥".repeat(hp) + "·".repeat(Game.HP_MAX - hp), game.kills, int(game.time)]
 	if game.state == "win":
 		return line + "\n\nПобеда! R — заново"
 	if game.state == "lose":
@@ -12,7 +12,7 @@ static func text(game: Game, hero: Vector3) -> String:
 	for c in game.crystals:
 		best = minf(best, c.distance_to(Vector2(hero.x, hero.z)))
 	line += "\nБлижайший кристалл: %d м" % int(best)
-	return line + "\nWASD — ход, Q/E — поворот"
+	return line + "\nWASD — ход, Q/E — поворот, ЛКМ — огненный шар"
 
 static func make_label() -> Label:
 	var l := Label.new()

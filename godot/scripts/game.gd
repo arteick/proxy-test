@@ -9,7 +9,7 @@ const SEE_R := 12.0
 const ENEMY_SPEED := 3.0
 const HP_MAX := 5          # жизни героя
 const ENEMY_HP := 3        # жизни каждой мыши, у всех одинаково
-const FIREBALL_DMG := 1
+const FIREBALL_DMG := 9999   # пока шар убивает любую мышь с одного попадания
 const BLAST_R := 2.5
 const INVULN := 1.2
 
@@ -19,6 +19,7 @@ var enemy_hp: Array = []   # жизни мышей, по индексам enemie
 var homes: Array = []      # где тень стоит, пока героя не видно
 var hp := HP_MAX
 var score := 0
+var kills := 0             # убито мышей
 var time := 0.0
 var hurt_cd := 0.0
 var state := "play"        # play | win | lose
@@ -76,4 +77,5 @@ func blast(at: Vector2, dmg: int = FIREBALL_DMG) -> Array:
 				homes.remove_at(i)
 				enemy_hp.remove_at(i)
 				dead.append(i)
+				kills += 1
 	return dead

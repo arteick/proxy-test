@@ -66,6 +66,7 @@ func _on_explosion(at: Vector3) -> void:
 	for i in game.blast(Vector2(at.x, at.z)):
 		enemy_nodes[i].queue_free()
 		enemy_nodes.remove_at(i)
+		light.flash()
 
 func _unhandled_key_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and e.physical_keycode == KEY_R:
