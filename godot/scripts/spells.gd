@@ -3,6 +3,7 @@ const Move = preload("res://scripts/move.gd")
 const Fireball = preload("res://scripts/fireball.gd")
 const Explosion = preload("res://scripts/explosion.gd")
 const Trail = preload("res://scripts/trail.gd")
+signal exploded(at: Vector3)
 # Заклинания: огненный шар (накопление, полёт, отмена), взрывы и выжженные пятна.
 
 var hero: Node3D
@@ -86,6 +87,7 @@ func _cursor_ground(fallback: Vector3) -> Vector3:
 	return hit if hit != null else fallback
 
 func _explode(at: Vector3) -> void:
+	exploded.emit(at)
 	boom_seed += 1
 	var ex := Explosion.make(at, boom_seed)
 	explosions.append([ex, Explosion.make_node(self, ex)])

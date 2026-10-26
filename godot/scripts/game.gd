@@ -7,11 +7,15 @@ const PICK_R := 1.0
 const HIT_R := 0.9
 const SEE_R := 12.0
 const ENEMY_SPEED := 3.0
-const HP_MAX := 3
+const HP_MAX := 5          # жизни героя
+const ENEMY_HP := 3        # жизни каждой мыши, у всех одинаково
+const FIREBALL_DMG := 1
+const BLAST_R := 2.5
 const INVULN := 1.2
 
 var crystals: Array = []   # Vector2(x, z)
 var enemies: Array = []    # Vector2(x, z)
+var enemy_hp: Array = []   # жизни мышей, по индексам enemies
 var homes: Array = []      # где тень стоит, пока героя не видно
 var hp := HP_MAX
 var score := 0
@@ -29,6 +33,8 @@ func _init(seed_value: int = 1) -> void:
 		var z := -14.0 - i * 18.0 - rng.randf() * 6.0
 		enemies.append(Vector2(rng.randf_range(-3.0, 3.0), z))
 	homes = enemies.duplicate()
+	for i in ENEMIES:
+		enemy_hp.append(ENEMY_HP)
 
 # Один тик. hero — позиция героя (Vector3). Возвращает события: "pick", "hurt", "win", "lose".
 func update(hero: Vector3, dt: float) -> Array:
@@ -58,3 +64,16 @@ func update(hero: Vector3, dt: float) -> Array:
 		state = "win"
 		ev.append("win")
 	return ev
+
+# Взрыв шара в точке (x, z): мыши в радиусе теряют жизни. Возвращает индексы убитых (по убыванию), их уже убрали из массивов.
+func blast(at: Vector2, dmg: int = FIREBALL_DMG) -> Array:
+	var dead: Array = []
+	for i in range(enemies.size() - 1, -1, -1):
+		if enemies[i].distance_to(at) <= BLAST_R:
+			enemy_hp[i] -= dmg
+			if enemy_hp[i] <= 0:
+				enemies.remove_at(i)
+				homes.remove_at(i)
+				enemy_hp.remove_at(i)
+				dead.append(i)
+	return dead

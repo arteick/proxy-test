@@ -54,3 +54,5 @@
 - 2026-10-26 (20261026-032428-pppx): шар быстрее (FLY_SPEED 14), шлейф из ASCII-символов (trail.gd, spells.gd). Тесты логики: 64 ok (godot 4.3 headless).
 
 - 2026-10-26: антирябь пола — мипы и анизотропия (level.gd), усреднение 3x3 в ascii.gdshader. Godot 4.3 headless: тесты exit 0.
+
+- 2026-10-26 (20261026-032825-fe3c): жизни: герой 5, мыши по 3 (game.gd), урон взрывом шара (blast, spells.gd, world.gd), +2 теста, Godot 4.3 headless: 66 ok, 0 FAIL.

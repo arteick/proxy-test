@@ -64,6 +64,12 @@ func _init() -> void:
 	g.hp = 1; g.hurt_cd = 0.0
 	check(g.update(far_hero, 0.016).has("lose") and g.state == "lose", "игра: поражение")
 	check(g.update(far_hero, 1.0).is_empty(), "игра: после конца события не идут")
+	var bg := Game.new(5)
+	check(Game.HP_MAX > 3 and bg.enemy_hp == [Game.ENEMY_HP, Game.ENEMY_HP, Game.ENEMY_HP], "жизни: герой крепче, у всех мышей поровну")
+	bg.enemies = [Vector2(0, 0), Vector2(1, 0), Vector2(50, 0)]
+	bg.homes = bg.enemies.duplicate()
+	bg.enemy_hp = [1, 3, 3]
+	check(bg.blast(Vector2(0, 0)) == [0] and bg.enemies.size() == 2 and bg.enemy_hp == [2, 3] and bg.homes.size() == 2, "взрыв: ранит в радиусе, убивает без жизней, дальние целы")
 	var w := Game.new(3)
 	w.enemies = []; w.homes = []
 	var evs: Array = []
@@ -80,7 +86,7 @@ func _init() -> void:
 	check(hand.z < -0.3, "герой: правая рука вынесена вперёд к посоху, не назад")
 	var gh := Game.new(1)
 	var txt := Hud.text(gh, Vector3.ZERO)
-	check(txt.contains("Кристаллы 0/8") and txt.contains("♥♥♥") and txt.contains("Ближайший"), "HUD: счёт, жизни, подсказка")
+	check(txt.contains("Кристаллы 0/8") and txt.contains("♥♥♥♥♥") and txt.contains("Ближайший"), "HUD: счёт, жизни, подсказка")
 	gh.state = "win"
 	check(Hud.text(gh, Vector3.ZERO).contains("Победа"), "HUD: победа")
 	gh.state = "lose"; gh.hp = 0

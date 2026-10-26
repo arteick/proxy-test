@@ -44,6 +44,7 @@ func _ready() -> void:
 	ascii_mat = Postfx.build(self, cam)
 	add_child(spells)
 	spells.setup(hero, cam)
+	spells.exploded.connect(_on_explosion)
 	hud = Hud.make_label()
 	var layer := CanvasLayer.new()
 	layer.add_child(hud)
@@ -58,6 +59,13 @@ func _new_game() -> void:
 	hero.position = Vector3.ZERO
 	crystal_nodes = Actors.spawn_crystals(self, game.crystals)
 	enemy_nodes = Actors.spawn_enemies(self, game.enemies)
+
+func _on_explosion(at: Vector3) -> void:
+	if game.state != "play":
+		return
+	for i in game.blast(Vector2(at.x, at.z)):
+		enemy_nodes[i].queue_free()
+		enemy_nodes.remove_at(i)
 
 func _unhandled_key_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and e.physical_keycode == KEY_R:
