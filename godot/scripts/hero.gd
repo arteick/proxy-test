@@ -3,6 +3,9 @@ extends Node3D
 
 const CAPE_SEGS := 4
 const CAPE_LEN := 0.42
+const STAFF_GRIP := 1.0 # высота pivot посоха над землёй (низ шеста = 0)
+const STAFF_Z := -0.55 # посох впереди героя (он смотрит в -Z)
+const ARM_REACH := -0.7 # правая рука вынесена вперёд к посоху
 
 var body := Node3D.new()
 var staff := Node3D.new()
@@ -69,11 +72,11 @@ func _build() -> void:
 	_build_robe_texture(robe, robe_dark)
 	var feet := _mat(Color("2b1d12"), 0.9)
 	# руки: левая машет, правая держит посох
-	for l in [[arm_l, -0.5], [arm_r, 0.5]]:
+	for l in [[arm_l, -0.47], [arm_r, 0.47]]:
 		var pivot: Node3D = l[0]
-		pivot.position = Vector3(l[1], 1.88, 0)
+		pivot.position = Vector3(l[1], 1.86, 0)
 		body.add_child(pivot)
-		_mesh(_box(Vector3(0.2, 0.8, 0.2)), robe, Vector3(0, -0.4, 0), pivot)
+		_mesh(_box(Vector3(0.24, 0.8, 0.24)), robe, Vector3(0, -0.4, 0), pivot)
 		_mesh(_box(Vector3(0.14, 0.14, 0.14)), skin, Vector3(0, -0.85, 0), pivot)
 	for l in [[leg_l, -0.2], [leg_r, 0.2]]:
 		var pivot: Node3D = l[0]
@@ -82,8 +85,9 @@ func _build() -> void:
 		_mesh(_box(Vector3(0.2, 0.55, 0.24)), feet, Vector3(0, -0.22, 0), pivot)
 		_mesh(_box(Vector3(0.22, 0.12, 0.34)), feet, Vector3(0, -0.46, -0.05), pivot)
 	# посох в правой руке: pivot в кисти, наклон задаётся в _animate
-	arm_r.add_child(staff)
-	staff.position = Vector3(0, -0.85, 0)
+	# посох стоит на земле перед героем (не на спине): узел staff — ребёнок героя, низ посоха в y=0
+	add_child(staff)
+	staff.position = Vector3(0.47, STAFF_GRIP, STAFF_Z)
 	var shaft := CylinderMesh.new(); shaft.top_radius = 0.04; shaft.bottom_radius = 0.05; shaft.height = 2.45
 	shaft.radial_segments = 6
 	_mesh(shaft, wood, Vector3(0, 0.225, 0), staff)
@@ -104,13 +108,13 @@ func _build_robe_texture(robe: Material, robe_dark: Material) -> void:
 	var trim := _mat(Color("d8b44a"), 0.5)
 	for i in 12:
 		var a := TAU * i / 12.0
-		var fold := BoxMesh.new(); fold.size = Vector3(0.1, 1.45, 0.2)
-		var f := _mesh(fold, robe_dark if i % 2 else robe, Vector3(sin(a) * 0.5, 0.78, cos(a) * 0.5), body)
+		var fold := BoxMesh.new(); fold.size = Vector3(0.12, 1.45, 0.08)
+		var f := _mesh(fold, robe_dark if i % 2 else robe, Vector3(sin(a) * 0.45, 0.78, cos(a) * 0.45), body)
 		f.basis = Basis(Vector3.UP, a) * Basis(Vector3.RIGHT, -0.2)
-		var tooth := PrismMesh.new(); tooth.size = Vector3(0.3, 0.22, 0.1)
-		var h := _mesh(tooth, trim if i % 3 == 0 else robe_dark, Vector3(sin(a) * 0.66, 0.1, cos(a) * 0.66), body)
+		var tooth := PrismMesh.new(); tooth.size = Vector3(0.24, 0.16, 0.06)
+		var h := _mesh(tooth, trim if i % 3 == 0 else robe_dark, Vector3(sin(a) * 0.62, 0.1, cos(a) * 0.62), body)
 		h.basis = Basis(Vector3.UP, a) * Basis(Vector3.RIGHT, PI)
-	var hem := TorusMesh.new(); hem.inner_radius = 0.58; hem.outer_radius = 0.68
+	var hem := TorusMesh.new(); hem.inner_radius = 0.56; hem.outer_radius = 0.64
 	hem.rings = 8; hem.ring_segments = 6
 	_mesh(hem, trim, Vector3(0, 0.12, 0), body)
 	# плащ-шлейф: цепочка сегментов от плеч; каждый следующий — ребёнок предыдущего,
@@ -120,19 +124,16 @@ func _build_robe_texture(robe: Material, robe_dark: Material) -> void:
 		var seg := Node3D.new()
 		seg.position = Vector3(0, 1.92, 0.24) if j == 0 else Vector3(0, -CAPE_LEN, 0)
 		parent.add_child(seg)
-		var cape := _box(Vector3(0.8 - j * 0.07, CAPE_LEN + 0.02, 0.05))
+		var cape := _box(Vector3(0.66 - j * 0.05, CAPE_LEN + 0.02, 0.05))
 		_mesh(cape, robe_dark if j % 2 == 0 else robe, Vector3(0, -CAPE_LEN / 2.0, 0), seg)
 		cape_segs.append(seg)
 		parent = seg
-	var collar := TorusMesh.new(); collar.inner_radius = 0.26; collar.outer_radius = 0.42
+	var collar := TorusMesh.new(); collar.inner_radius = 0.16; collar.outer_radius = 0.3
 	collar.rings = 8; collar.ring_segments = 6
 	_mesh(collar, trim, Vector3(0, 1.98, 0), body)
 	var sash := BoxMesh.new(); sash.size = Vector3(0.14, 1.0, 0.04)
-	var sh := _mesh(sash, trim, Vector3(0, 0.95, -0.52), body)
+	var sh := _mesh(sash, trim, Vector3(0, 0.95, -0.44), body)
 	sh.rotation.x = -0.22
-	for side in [-0.5, 0.5]:
-		var sleeve := _box(Vector3(0.3, 0.3, 0.3))
-		_mesh(sleeve, robe_dark, Vector3(side, 1.88, 0), body)
 
 func animate(dt: float, moving: bool, t: float) -> void:
 	var turn := angle_difference(prev_face, rotation.y) / maxf(dt, 0.001)
@@ -149,10 +150,11 @@ func animate(dt: float, moving: bool, t: float) -> void:
 	body.rotation.x = -0.14 * amp
 	body.rotation.y = s * 0.14 * amp
 	body.rotation.z = -s * 0.05 * amp
-	# правая рука держит посох: вынесена вперёд, посох упирается в землю впереди и качается с шагом
-	arm_r.rotation.x = lerpf(-0.3, -0.45, amp)
-	var tilt := lerpf(0.05, 0.4 + c * 0.12, amp)
-	staff.rotation.x = tilt - arm_r.rotation.x
+	# правая рука тянется вперёд; посох стоит на земле, при шаге переставляется вперёд-назад и чуть отрывается
+	arm_r.rotation.x = ARM_REACH
+	staff.position.z = STAFF_Z - c * 0.14 * amp
+	staff.position.y = STAFF_GRIP + maxf(0.0, s) * 0.12 * amp
+	staff.rotation.x = -0.06 + c * 0.05 * amp
 	# шлейф: пружина по скорости поворота героя (влево-вправо) + волна вдоль ткани при ходьбе
 	cape_lag = lerpf(cape_lag, clampf(-turn * 0.06, -0.8, 0.8), minf(1.0, dt * 6.0))
 	for i in cape_segs.size():
