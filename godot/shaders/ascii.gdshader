@@ -4,7 +4,7 @@ render_mode unshaded, depth_test_disabled, skip_vertex_transform;
 uniform sampler2D screen_tex : hint_screen_texture, filter_nearest;
 uniform sampler2D depth_tex : hint_depth_texture, filter_nearest;
 uniform sampler2D atlas : filter_linear;
-uniform float cell = 10.0;
+uniform float cell = 8.0;
 uniform float n_glyphs = 10.0;
 uniform float far_blend = 0.0; // 0 — символы, 1 — дальний вид: плоские насыщенные цвета с контуром
 
@@ -29,7 +29,10 @@ void fragment() {
 	vec3 col = texture(screen_tex, cuv).rgb;
 	float lum = dot(col, vec3(0.299, 0.587, 0.114));
 	lum = pow(clamp(lum * 1.2, 0.0, 1.0), 0.8);
-	float idx = floor(lum * (n_glyphs - 1.0) + 0.5);
+	// разнообразие: соседние по яркости символы выбираются по хэшу ячейки, поэтому ровные поверхности не залиты одним знаком
+	float hsh = fract(sin(dot(cell_id, vec2(12.9898, 78.233))) * 43758.5453);
+	float jit = (hsh - 0.5) * 3.0 * (1.0 - far_blend) * step(0.04, lum);
+	float idx = clamp(floor(lum * (n_glyphs - 1.0) + 0.5 + jit), 0.0, n_glyphs - 1.0);
 	float cov = texture(atlas, vec2((idx + local.x) / n_glyphs, local.y)).r;
 
 	// контур по перепаду глубины между соседними ячейками: силуэты читаются и без символов
