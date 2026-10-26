@@ -1,8 +1,5 @@
 name: Pages
 on:
-  push:
-    branches: [main]
-    paths: ['src/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
