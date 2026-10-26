@@ -2,6 +2,7 @@ extends SceneTree
 const Ascii = preload("res://scripts/ascii.gd")
 const Move = preload("res://scripts/move.gd")
 const Game = preload("res://scripts/game.gd")
+const Hero = preload("res://scripts/hero.gd")
 # Запуск: godot --headless --path godot -s tests/run.gd
 
 var fails := 0
@@ -53,4 +54,9 @@ func _init() -> void:
 	for c in w.crystals.duplicate():
 		evs = w.update(Vector3(c.x, 0, c.y), 0.016)
 	check(w.state == "win" and evs.has("win"), "игра: победа после последнего кристалла")
+	var hero := Hero.new()
+	hero._ready()
+	check(hero.cape_segs.size() == Hero.CAPE_SEGS and hero.get_child_count() > 2, "герой: модель собирается")
+	hero.animate(0.1, true, 0.1)
+	check(hero.amp > 0.0 and hero.staff.rotation.x != 0.0, "герой: анимация ходьбы двигает суставы")
 	quit(1 if fails else 0)
