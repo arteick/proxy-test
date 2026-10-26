@@ -18,8 +18,20 @@ static func resolve(pos: Vector3, hero_r: float, colliders: Array) -> Vector3:
 			pos.z = c.y + d.y * min_d
 	return pos
 
+# Шаг режется на куски не длиннее MAX_STEP, иначе при просадке кадров (или рывке) герой проскакивает колонну насквозь.
+const MAX_STEP := 0.25
 static func step(pos: Vector3, dir: Vector3, speed: float, dt: float, hero_r: float, colliders: Array) -> Vector3:
-	return resolve(pos + dir * speed * dt, hero_r, colliders)
+	var n := maxi(1, ceili(speed * dt / MAX_STEP))
+	for i in n:
+		pos = resolve(pos + dir * speed * dt / n, hero_r, colliders)
+	return pos
+
+# Точка внутри какого-нибудь препятствия (для шара: взрыв о колонну).
+static func blocked(p: Vector3, colliders: Array) -> bool:
+	for c in colliders:
+		if Vector2(p.x - c.x, p.z - c.y).length() < c.z:
+			return true
+	return false
 
 # Поворот камеры от движения мыши: rel — сдвиг в пикселях, pitch ограничен, чтобы камера не уходила под землю и за зенит.
 const PITCH_MIN := -0.15

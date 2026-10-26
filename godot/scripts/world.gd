@@ -57,7 +57,7 @@ func _ready() -> void:
 	add_child(spells)
 	spells.setup(hero, cam)
 	spells.exploded.connect(_on_explosion)
-	spells.hit_test = func(p: Vector3) -> bool: return game.state == "play" and game.ball_hit(Vector2(p.x, p.z)) >= 0
+	spells.hit_test = func(p: Vector3) -> bool: return game.state == "play" and (game.ball_hit(Vector2(p.x, p.z)) >= 0 or Move.blocked(p, colliders))
 	hud = Hud.make_label()
 	var layer := CanvasLayer.new()
 	layer.add_child(hud)
@@ -118,7 +118,8 @@ func _update_game(dt: float) -> void:
 		last_hud = txt
 		hud.text = txt
 
-func _process(dt: float) -> void:
+func _process(delta: float) -> void:
+	var dt := minf(delta, 0.05) # просадка кадра не должна растягиваться в рывок через стены и шары
 	t += dt
 	if warm:
 		warm_frames -= 1

@@ -34,6 +34,8 @@ func _init() -> void:
 	var p := Move.step(Vector3(0, 0, 3), Vector3(0, 0, -1), 2.0, 1.0, 0.5, wall)
 	check(p.z >= 1.5 - 0.001, "коллизия: не заходит в колонну")
 	check(Move.step(Vector3(5, 0, 5), Vector3(1, 0, 0), 2.0, 0.5, 0.5, wall).x == 6.0, "движение без препятствий")
+	check(Move.step(Vector3(0, 0, 3), Vector3(0, 0, -1), 16.0, 0.5, 0.45, wall).z >= 1.45 - 0.001, "коллизия: большой шаг (рывок, просадка fps) не проскакивает колонну")
+	check(Move.blocked(Vector3(0.5, 0.3, 0), wall) and not Move.blocked(Vector3(2, 0.3, 0), wall), "шар: внутри колонны — преграда")
 	var tc := Move.top_down_cam(Vector3.ZERO, 0.0, 1.0)
 	check(tc.y > 25.0 and tc.z > 5.0 and tc.z < 15.0, "камера: вид почти строго сверху, не над героем")
 	check(Move.ortho_size(2.0) > Move.ortho_size(1.0) and Move.ortho_size(99.0) == Move.ORTHO_SIZE * Move.ZOOM_MAX, "камера: масштаб растёт и ограничен")
