@@ -28,6 +28,7 @@ var game: Game
 var crystal_nodes: Array = []
 var enemy_nodes: Array = []
 var hud: Label
+var ascii_mat: ShaderMaterial
 var run_seed := 1
 
 func _ready() -> void:
@@ -37,7 +38,8 @@ func _ready() -> void:
 
 	cam = Camera3D.new()
 	cam.far = FAR
-	cam.fov = 40.0
+	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
+	cam.size = Move.ortho_size(zoom)
 	add_child(cam)
 	_build_ascii_pass()
 	hud = Hud.make_label()
@@ -60,6 +62,7 @@ func _build_ascii_pass() -> void:
 	atlas_vp.set_script(load("res://scripts/atlas.gd"))
 	add_child(atlas_vp)
 	var mat := ShaderMaterial.new()
+	ascii_mat = mat
 	mat.shader = load("res://shaders/ascii.gdshader")
 	mat.set_shader_parameter("atlas", atlas_vp.get_texture())
 	mat.set_shader_parameter("n_glyphs", float(Ascii.RAMP.length()))
@@ -75,8 +78,8 @@ func _build_ascii_pass() -> void:
 func _input(e: InputEvent) -> void:
 	# вид сверху: наклон фиксирован, мышь камеру не крутит; колесо — масштаб
 	if e is InputEventMouseButton and e.pressed:
-		if e.button_index == MOUSE_BUTTON_WHEEL_DOWN: zoom = minf(2.2, zoom * 1.06)
-		if e.button_index == MOUSE_BUTTON_WHEEL_UP: zoom = maxf(0.5, zoom * 0.94)
+		if e.button_index == MOUSE_BUTTON_WHEEL_DOWN: zoom = minf(Move.ZOOM_MAX, zoom * 1.08)
+		if e.button_index == MOUSE_BUTTON_WHEEL_UP: zoom = maxf(Move.ZOOM_MIN, zoom * 0.93)
 
 func _unhandled_key_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and e.physical_keycode == KEY_R:
@@ -95,8 +98,10 @@ func _update_game(dt: float) -> void:
 	for i in crystal_nodes.size():
 		crystal_nodes[i].position.y = 1.0 + sin(t * 2.0 + i) * 0.15
 		crystal_nodes[i].rotation.y = t
+		crystal_nodes[i].scale = Vector3.ONE * Move.marker_scale(zoom)
 	for i in enemy_nodes.size():
 		enemy_nodes[i].position = Vector3(game.enemies[i].x, 1.0 + sin(t * 3.0 + i) * 0.2, game.enemies[i].y)
+		enemy_nodes[i].scale = Vector3.ONE * Move.marker_scale(zoom)
 	if ev.has("hurt"):
 		light.flash()
 	hud.text = Hud.text(game, hero.position)
@@ -118,4 +123,8 @@ func _process(dt: float) -> void:
 	light.follow(base, m, t, dt)
 	cam.position = Move.top_down_cam(base, yaw, zoom)
 	cam.look_at(base)
+	cam.size = Move.ortho_size(zoom)
+	ascii_mat.set_shader_parameter("far_blend", Move.far_blend(zoom))
+	var ms := Move.marker_scale(zoom)
+	hero.scale = Vector3.ONE * ms
 	_update_game(dt)
