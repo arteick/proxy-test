@@ -7,6 +7,7 @@ const Hud = preload("res://scripts/hud.gd")
 const Level = preload("res://scripts/level.gd")
 const Actors = preload("res://scripts/actors.gd")
 const Lighting = preload("res://scripts/lighting.gd")
+const Fireball = preload("res://scripts/fireball.gd")
 # Сцена целиком в коде: колонны, персонаж, свет, камера и ASCII-постобработка.
 
 const FAR := 60.0
@@ -30,6 +31,10 @@ var enemy_nodes: Array = []
 var hud: Label
 var ascii_mat: ShaderMaterial
 var run_seed := 1
+var ball: Fireball # шар, который копится над головой
+var ball_node: Node3D
+var flying: Array = [] # [Fireball, Node3D]
+var ball_blocked := false # после отмены ждём отпускания ЛКМ
 
 func _ready() -> void:
 	colliders = Level.build(self) + Level.build_ruins(self)
@@ -106,17 +111,51 @@ func _update_game(dt: float) -> void:
 		light.flash()
 	hud.text = Hud.text(game, hero.position)
 
+func _update_fireball(dt: float, lmb: bool, rmb: bool) -> void:
+	if not lmb:
+		ball_blocked = false
+	var ms := Move.marker_scale(zoom)
+	if ball == null and lmb and not rmb and not ball_blocked and game.state == "play":
+		ball = Fireball.new()
+		ball_node = Fireball.make_node(self)
+	if ball != null:
+		ball.update(dt, lmb, rmb)
+		ball.pos = hero.position + Vector3(0, 3.7 * ms, 0)
+		if ball.state == "fading":
+			ball_blocked = true
+		if ball.state == "flying":
+			ball.dir = Vector3(0, 0, -1).rotated(Vector3.UP, hero.rotation.y)
+			ball.pos = hero.position + Vector3(0, 3.7 * ms, 0) + ball.dir * 0.8
+			flying.append([ball, ball_node])
+			ball = null
+		elif ball.state == "gone":
+			ball_node.queue_free()
+			ball = null
+		else:
+			Fireball.apply(ball_node, ball, ms, t)
+	for f in flying.duplicate():
+		f[0].update(dt, false, false)
+		if f[0].state == "gone":
+			f[1].queue_free()
+			flying.erase(f)
+		else:
+			Fireball.apply(f[1], f[0], ms, t)
+
 func _process(dt: float) -> void:
 	t += dt
 	yaw += (float(Input.is_physical_key_pressed(KEY_Q)) - float(Input.is_physical_key_pressed(KEY_E))) * 1.8 * dt
 	var wasd := Vector2(
 		float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 		float(Input.is_physical_key_pressed(KEY_W)) - float(Input.is_physical_key_pressed(KEY_S)))
+	var lmb := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	var rmb := Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)
+	_update_fireball(dt, lmb, rmb)
 	var dir := Move.wish_dir(wasd, yaw) if game.state == "play" else Vector3.ZERO
 	moving = dir != Vector3.ZERO
 	if moving:
-		hero.position = Move.step(hero.position, dir, SPEED, dt, HERO_R, colliders)
+		hero.position = Move.step(hero.position, dir, SPEED * Fireball.speed_mult(ball), dt, HERO_R, colliders)
 		hero.rotation.y = lerp_angle(hero.rotation.y, atan2(-dir.x, -dir.z), minf(1.0, dt * 12.0))
+	hero.casting = ball != null and ball.state == "charging"
 	hero.animate(dt, moving, t)
 	var base := hero.position
 	var m := get_viewport().get_mouse_position() / Vector2(get_viewport().get_visible_rect().size)

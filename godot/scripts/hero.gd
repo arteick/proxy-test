@@ -5,6 +5,7 @@ const CAPE_SEGS := 4
 const CAPE_LEN := 0.42
 const STAFF_GRIP := 1.0 # высота pivot посоха над землёй (низ шеста = 0)
 const STAFF_Z := -0.55 # посох впереди героя (он смотрит в -Z)
+const STAFF_OVERHEAD := 2.9 # высота вращающегося посоха над героем
 const ARM_REACH := 0.7 # правая рука вынесена вперёд к посоху (+rotation.x по X тянет кисть в -Z)
 
 var body := Node3D.new()
@@ -14,6 +15,9 @@ var cape_lag := 0.0
 var step_phase := 0.0
 var amp := 0.0
 var prev_face := 0.0
+var casting := false # ЛКМ: посох раскручивается над головой
+var cast_amt := 0.0
+var spin := 0.0
 var arm_l := Node3D.new(); var arm_r := Node3D.new()
 var leg_l := Node3D.new(); var leg_r := Node3D.new()
 
@@ -151,10 +155,12 @@ func animate(dt: float, moving: bool, t: float) -> void:
 	body.rotation.y = s * 0.14 * amp
 	body.rotation.z = -s * 0.05 * amp
 	# правая рука тянется вперёд; посох стоит на земле, при шаге переставляется вперёд-назад и чуть отрывается
-	arm_r.rotation.x = ARM_REACH
-	staff.position.z = STAFF_Z - c * 0.14 * amp
-	staff.position.y = STAFF_GRIP + maxf(0.0, s) * 0.12 * amp
-	staff.rotation.x = -0.06 + c * 0.05 * amp
+	cast_amt = lerpf(cast_amt, 1.0 if casting else 0.0, minf(1.0, dt * 6.0))
+	spin += dt * 14.0 * cast_amt
+	arm_r.rotation.x = lerpf(ARM_REACH, 2.9, cast_amt)
+	staff.position = Vector3(0.47, STAFF_GRIP, STAFF_Z - c * 0.14 * amp).lerp(Vector3(0, STAFF_OVERHEAD, 0), cast_amt)
+	staff.position.y += maxf(0.0, s) * 0.12 * amp * (1.0 - cast_amt)
+	staff.rotation = Vector3(-0.06 + c * 0.05 * amp, 0.0, 0.0).lerp(Vector3(0.0, spin, PI / 2.0), cast_amt)
 	# шлейф: пружина по скорости поворота героя (влево-вправо) + волна вдоль ткани при ходьбе
 	cape_lag = lerpf(cape_lag, clampf(-turn * 0.06, -0.8, 0.8), minf(1.0, dt * 6.0))
 	for i in cape_segs.size():
