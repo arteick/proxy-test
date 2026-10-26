@@ -11,6 +11,7 @@ const Dash = preload("res://scripts/dash.gd")
 const Trail = preload("res://scripts/trail.gd")
 const Explosion = preload("res://scripts/explosion.gd")
 const Campfire = preload("res://scripts/campfire.gd")
+const Prewarm = preload("res://scripts/prewarm.gd")
 # Запуск: godot --headless --path godot -s tests/run.gd
 
 var fails := 0
@@ -208,5 +209,13 @@ func _init() -> void:
 			rose = rose and cf.smoke_pos().y <= Campfire.SMOKE_BASE_Y + Campfire.SMOKE_RISE + 0.001
 	check(seen > 0 and seen < 400 and rose, "костёр: дым по одной частице, не выше одного символа")
 	check(Campfire.new().smoke_pos() == null and Campfire.new().smoke_alpha() == 0.0, "костёр: сначала дыма нет")
+	var pw := Prewarm.chars()
+	var covered := true
+	for c in Explosion.CHARS + Trail.CHARS + Campfire.SMOKE_CHARS + Campfire.ROW_CHARS[0] + Campfire.ROW_CHARS[3]:
+		covered = covered and pw.contains(c)
+	var single := true
+	for i in pw.length():
+		single = single and pw.count(pw[i]) == 1
+	check(covered and single and not pw.is_empty(), "прогрев: все символы эффектов, без повторов")
 	root.free()
 	quit(1 if fails else 0)

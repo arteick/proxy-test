@@ -10,6 +10,7 @@ const Spells = preload("res://scripts/spells.gd")
 const Postfx = preload("res://scripts/postfx.gd")
 const Dash = preload("res://scripts/dash.gd")
 const Campfire = preload("res://scripts/campfire.gd")
+const Prewarm = preload("res://scripts/prewarm.gd")
 # Сцена целиком в коде: колонны, персонаж, свет, камера и ASCII-постобработка.
 
 const FAR := 60.0
@@ -37,6 +38,8 @@ var spells := Spells.new()
 var dash := Dash.new()
 var fire := Campfire.new()
 var fire_node: Node3D
+var warm: Node3D
+var warm_frames := Prewarm.FRAMES
 
 func _ready() -> void:
 	colliders = Level.build(self) + Level.build_ruins(self)
@@ -59,6 +62,7 @@ func _ready() -> void:
 	var layer := CanvasLayer.new()
 	layer.add_child(hud)
 	add_child(layer)
+	warm = Prewarm.make_node(hero)
 	_new_game()
 
 func _new_game() -> void:
@@ -116,6 +120,11 @@ func _update_game(dt: float) -> void:
 
 func _process(dt: float) -> void:
 	t += dt
+	if warm:
+		warm_frames -= 1
+		if warm_frames <= 0:
+			warm.queue_free()
+			warm = null
 	yaw += (float(Input.is_physical_key_pressed(KEY_Q)) - float(Input.is_physical_key_pressed(KEY_E))) * 1.8 * dt
 	var wasd := Vector2(
 		float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
