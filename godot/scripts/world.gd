@@ -8,6 +8,7 @@ const Actors = preload("res://scripts/actors.gd")
 const Lighting = preload("res://scripts/lighting.gd")
 const Spells = preload("res://scripts/spells.gd")
 const Postfx = preload("res://scripts/postfx.gd")
+const Dash = preload("res://scripts/dash.gd")
 # Сцена целиком в коде: колонны, персонаж, свет, камера и ASCII-постобработка.
 
 const FAR := 60.0
@@ -32,6 +33,7 @@ var marker := Move.marker_scale(Move.ZOOM_FIXED) # масштаб значков
 var last_hud := ""
 var run_seed := 1
 var spells := Spells.new()
+var dash := Dash.new()
 
 func _ready() -> void:
 	colliders = Level.build(self) + Level.build_ruins(self)
@@ -60,6 +62,7 @@ func _new_game() -> void:
 	game = Game.new(run_seed)
 	run_seed += 1
 	hero.position = Vector3.ZERO
+	dash = Dash.new()
 	crystal_nodes = Actors.spawn_crystals(self, game.crystals)
 	enemy_nodes = Actors.spawn_enemies(self, game.enemies)
 
@@ -76,6 +79,7 @@ func _unhandled_key_input(e: InputEvent) -> void:
 		_new_game()
 
 func _update_game(dt: float) -> void:
+	game.dodging = dash.active()
 	var ev := game.update(hero.position, dt)
 	# кристаллы подбираются по порядку удаления с конца: пересобираем узлы по совпадению позиции
 	while crystal_nodes.size() > game.crystals.size():
@@ -100,7 +104,7 @@ func _update_game(dt: float) -> void:
 		enemy_nodes[i].scale = Vector3.ONE * marker
 	if ev.has("hurt"):
 		light.flash()
-	var txt := Hud.text(game, hero.position)
+	var txt := Hud.text(game, hero.position, dash.charge())
 	if txt != last_hud: # Label пересчитывает раскладку при каждой записи текста
 		last_hud = txt
 		hud.text = txt
@@ -114,7 +118,13 @@ func _process(dt: float) -> void:
 	spells.update(dt, t, zoom, game.state == "play")
 	var dir := Move.wish_dir(wasd, yaw) if game.state == "play" else Vector3.ZERO
 	moving = dir != Vector3.ZERO
-	if moving:
+	dash.update(dt)
+	if game.state == "play" and Input.is_physical_key_pressed(KEY_SHIFT):
+		var facing := Vector3(-sin(hero.rotation.y), 0.0, -cos(hero.rotation.y))
+		dash.start(dir if moving else facing)
+	if dash.active():
+		hero.position = Move.step(hero.position, dash.dir, Dash.SPEED, dt, HERO_R, colliders)
+	elif moving:
 		hero.position = Move.step(hero.position, dir, SPEED * spells.speed_mult(), dt, HERO_R, colliders)
 		hero.rotation.y = lerp_angle(hero.rotation.y, atan2(-dir.x, -dir.z), minf(1.0, dt * 12.0))
 	if spells.charging():

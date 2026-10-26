@@ -22,6 +22,7 @@ var score := 0
 var kills := 0             # убито мышей
 var time := 0.0
 var hurt_cd := 0.0
+var dodging := false       # рывок: урон не проходит
 var state := "play"        # play | win | lose
 
 func _init(seed_value: int = 1) -> void:
@@ -54,7 +55,7 @@ func update(hero: Vector3, dt: float) -> Array:
 		var e: Vector2 = enemies[i]
 		var target: Vector2 = h if e.distance_to(h) < SEE_R else homes[i]
 		enemies[i] = e.move_toward(target, ENEMY_SPEED * dt)
-		if enemies[i].distance_to(h) < HIT_R and hurt_cd == 0.0:
+		if enemies[i].distance_to(h) < HIT_R and hurt_cd == 0.0 and not dodging:
 			hp -= 1
 			hurt_cd = INVULN
 			ev.append("hurt")

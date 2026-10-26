@@ -1,7 +1,7 @@
 # Текст HUD без зависимости от сцены (тестируется headless).
 const Game = preload("res://scripts/game.gd")
 
-static func text(game: Game, hero: Vector3) -> String:
+static func text(game: Game, hero: Vector3, dash_charge: float = 1.0) -> String:
 	var hp := maxi(game.hp, 0)
 	var line := "Кристаллы %d/%d   Жизни %s   Убито %d   %d с" % [game.score, Game.CRYSTALS, "♥".repeat(hp) + "·".repeat(Game.HP_MAX - hp), game.kills, int(game.time)]
 	if game.state == "win":
@@ -12,7 +12,8 @@ static func text(game: Game, hero: Vector3) -> String:
 	for c in game.crystals:
 		best = minf(best, c.distance_to(Vector2(hero.x, hero.z)))
 	line += "\nБлижайший кристалл: %d м" % int(best)
-	return line + "\nWASD — ход, Q/E — поворот, ЛКМ — огненный шар"
+	var bar := "█".repeat(int(dash_charge * 5.0)) + "░".repeat(5 - int(dash_charge * 5.0))
+	return line + "\nРывок [%s]" % bar + "\nWASD — ход, Shift — рывок, Q/E — поворот, ЛКМ — огненный шар"
 
 static func make_label() -> Label:
 	var l := Label.new()

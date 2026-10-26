@@ -7,6 +7,7 @@ const Hud = preload("res://scripts/hud.gd")
 const Level = preload("res://scripts/level.gd")
 const Actors = preload("res://scripts/actors.gd")
 const Fireball = preload("res://scripts/fireball.gd")
+const Dash = preload("res://scripts/dash.gd")
 const Trail = preload("res://scripts/trail.gd")
 const Explosion = preload("res://scripts/explosion.gd")
 # Запуск: godot --headless --path godot -s tests/run.gd
@@ -169,5 +170,22 @@ func _init() -> void:
 	hz.casting = true
 	for k in 60: hz.animate(0.05, false, k * 0.05)
 	check(hz.cast_amt > 0.95 and absf(hz.staff.position.y - Hero.STAFF_OVERHEAD) < 0.1, "маг: посох над головой при ЛКМ")
+	var dd := Dash.new()
+	check(dd.ready() and not dd.start(Vector3.ZERO), "рывок: без направления не стартует")
+	check(dd.start(Vector3(0, 5, -3)) and dd.active() and is_equal_approx(dd.dir.length(), 1.0) and dd.dir.y == 0.0, "рывок: старт, направление в плоскости")
+	check(not dd.start(Vector3.RIGHT), "рывок: нельзя повторить сразу")
+	dd.update(Dash.DURATION + 0.01)
+	check(not dd.active() and not dd.ready() and dd.charge() < 0.2, "рывок: закончился, идёт перезарядка")
+	dd.update(Dash.COOLDOWN)
+	check(dd.ready() and dd.charge() == 1.0, "рывок: снова готов")
+	var gd := Game.new(1)
+	gd.dodging = true
+	gd.enemies[0] = Vector2.ZERO
+	gd.update(Vector3.ZERO, 0.1)
+	check(gd.hp == Game.HP_MAX, "рывок: во время него урон не проходит")
+	gd.dodging = false
+	gd.update(Vector3.ZERO, 0.1)
+	check(gd.hp == Game.HP_MAX - 1, "после рывка урон проходит")
+	check(Hud.text(gd, Vector3.ZERO, 1.0).contains("█████") and Hud.text(gd, Vector3.ZERO, 0.0).contains("░░░░░"), "HUD: полоска рывка")
 	root.free()
 	quit(1 if fails else 0)

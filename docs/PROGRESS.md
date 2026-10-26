@@ -64,3 +64,6 @@
 - world.gd: marker и far_blend считаются один раз, HUD обновляется при изменении текста.
 - spells.gd: обход flying/explosions с конца вместо duplicate().
 - Проверки: godot --headless тесты — 67 ok; xvfb-запуск 120 кадров без ошибок шейдера/скриптов.
+
+## 2026-10-26 — рывок (Shift)
+dash.gd (старт/длительность/перезарядка), Game.dodging, полоска в HUD, интеграция в world.gd. Проверка: godot --headless tests/run.gd — 75 ok, 0 FAIL.
