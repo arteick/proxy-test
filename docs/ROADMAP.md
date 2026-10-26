@@ -9,8 +9,8 @@
 - [x] Старый прототип (Three.js, src/) удалён 2026-10-26.
 
 ## Свет в Godot (по сравнению с Three.js-прототипом, коммит da54459^: src/main.js)
-- [ ] Заменить плоский ambient на небо/земля: в Three был HemisphereLight 0x7080b8 / 0x2a2018, сила 0.9 (в Godot плоский 0.5) — Sky-ресурс или ProceduralSky в Environment.
-- [ ] Подогнать затухание OmniLight: в Three decay 1.4, дальность 40; в Godot omni_attenuation по умолчанию 1.0 — выставить ~1.4 и подобрать energy.
-- [ ] Включить тон-маппинг/экспозицию в Environment и сравнить яркость до ASCII-шейдера.
+- [x] Заменить плоский ambient на небо/земля: в Three был HemisphereLight 0x7080b8 / 0x2a2018, сила 0.9 (в Godot плоский 0.5) — Sky-ресурс или ProceduralSky в Environment.
+- [x] Подогнать затухание OmniLight: в Three decay 1.4, дальность 40; в Godot omni_attenuation по умолчанию 1.0 — выставить ~1.4 и подобрать energy.
+- [x] Включить тон-маппинг/экспозицию в Environment и сравнить яркость до ASCII-шейдера.
 - [ ] Проверить мягкие тени от ключевого света (в Three PCFSoft 1024) и в шейдере ascii.gdshader подобрать кривую яркости→символ (сейчас pow 0.8, множитель 1.2).
 - [ ] Сделать скриншоты старого и нового рядом (xvfb) и сравнить.
