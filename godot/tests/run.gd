@@ -92,6 +92,7 @@ func _init() -> void:
 	var hero := Hero.new()
 	hero._ready()
 	check(hero.cape_segs.size() == Hero.CAPE_SEGS and hero.get_child_count() > 2, "герой: модель собирается")
+	check(Hero._outline() != null and Hero._outline() == Hero._outline(), "герой: контур общий для материалов")
 	hero.animate(0.1, true, 0.1)
 	check(hero.amp > 0.0 and hero.staff.rotation.x != 0.0, "герой: анимация ходьбы двигает суставы")
 	hero.animate(0.1, false, 0.1)

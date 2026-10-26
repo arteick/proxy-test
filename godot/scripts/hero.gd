@@ -8,6 +8,10 @@ const STAFF_Z := -0.55 # посох впереди героя (он смотри
 const STAFF_OVERHEAD := 2.9 # высота вращающегося посоха над героем
 const ARM_REACH := 0.7 # правая рука вынесена вперёд к посоху (+rotation.x по X тянет кисть в -Z)
 
+const OUTLINE_WIDTH := 0.05 # толщина контура мага (м)
+
+static var outline_mat: ShaderMaterial
+
 var body := Node3D.new()
 var staff := Node3D.new()
 var cape_segs: Array = []
@@ -28,7 +32,17 @@ func _mat(c: Color, rough: float) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.albedo_color = c
 	m.roughness = rough
+	m.next_pass = _outline()
 	return m
+
+# контур: вывернутая оболочка, раздутая по нормалям, яркого голубого цвета; общий для всех материалов героя
+static func _outline() -> ShaderMaterial:
+	if outline_mat == null:
+		var sh := Shader.new()
+		sh.code = "shader_type spatial;\nrender_mode unshaded, cull_front;\nuniform float w = %f;\nvoid vertex() { VERTEX += NORMAL * w; }\nvoid fragment() { ALBEDO = vec3(0.55, 0.85, 1.0); }" % OUTLINE_WIDTH
+		outline_mat = ShaderMaterial.new()
+		outline_mat.shader = sh
+	return outline_mat
 
 func _mesh(mesh: Mesh, mat: Material, pos: Vector3, parent: Node3D) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
